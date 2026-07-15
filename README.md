@@ -72,3 +72,16 @@ Below is the inventory of placeholder assets currently used in the codebase and 
 - **Target Asset**: Clean grotesque/neo-grotesque font (e.g., Neue Montreal).
 - **How to Swap**:
   - Update imports and configuration in [layout.tsx](file:///d:/projects/Lewis-Hamilton/src/app/layout.tsx) and the CSS custom variables `--font-ui` and `--font-mono` in [globals.css](file:///d:/projects/Lewis-Hamilton/src/app/globals.css).
+
+### 5. Era Timeline Media & Images
+- **Current Stand-ins**: Auto-generated `https://picsum.photos/seed/[imageSeed]/800/1000` inside [EraSection.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/EraSection.tsx).
+- **Target Assets**: High-resolution editorial photography matching each historical milestone:
+  - **McLaren (2007–2009)**: Rookie debut, 2008 rain-soaked Silverstone, and 2008 Interlagos final corner decider.
+  - **Mercedes (2014–2020)**: 2014 Abu Dhabi championship podium, 2020 wet Istanbul 7th title clinch.
+  - **Abu Dhabi 2021**: Muted/heavy visual of Lewis Hamilton at the 2021 season finale.
+  - **The Drought (2022–2024)**: Mercedes W13/W14 struggles (porpoising), 2024 Silverstone emotional redemption.
+  - **Ferrari (2025–Current)**: Scuderia Ferrari transition media (Maranello red).
+- **How to Swap**:
+  - Store the assets inside `/public/timeline/` (e.g., `/public/timeline/2008-silverstone.jpg`).
+  - Open [config.ts](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/config.ts) and modify each moment's `imageSeed` reference to point to the local file, or adjust [EraSection.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/EraSection.tsx) to read direct image paths from the config object.
+

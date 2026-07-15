@@ -2,18 +2,15 @@
 
 import { forwardRef } from "react";
 import Image from "next/image";
+import { HERO_IMAGE } from "@/config/imageConfig";
 
 // ─────────────────────────────────────────
-// PLACEHOLDER: The three layer images are all using the same
-// picsum placeholder. Replace with:
-//   bg layer:  /public/hero-bg.jpg        (blurred/abstract environment)
-//   mid layer: /public/hero-mid.jpg       (soft secondary element)
-//   fg layer:  /public/hero-portrait.jpg  (main driver portrait, left-weighted)
-//
-// Apply duotone via CSS: grayscale() + a colour overlay blend.
+// Three-layer parallax using a SINGLE real photo.
+// Depth separation is faked via CSS blur/brightness/masks:
+//   bg layer:  heavy blur + dark + purple duotone → atmospheric environment
+//   mid layer: medium blur + mid brightness + softer tint → transitional depth
+//   fg layer:  sharp + contrast + duotone highlight → subject "foreground"
 // ─────────────────────────────────────────
-
-const PLACEHOLDER_IMG = "https://picsum.photos/seed/hamilton/900/1200";
 
 export interface HeroCompositionRef {
   fg: HTMLDivElement | null;
@@ -49,7 +46,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             position: "absolute",
             inset: "-8%", // extra bleed so parallax doesn't expose edges
             willChange: "transform",
-            filter: "blur(18px) grayscale(100%)",
+            filter: "blur(18px) grayscale(100%) brightness(0.45)",
           }}
         >
           {/* Duotone colour overlay — purple cast */}
@@ -57,14 +54,25 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(122, 79, 255, 0.18)",
+              background: "rgba(122, 79, 255, 0.22)",
               mixBlendMode: "color",
               zIndex: 1,
               pointerEvents: "none",
             }}
           />
+          {/* Radial mask to darken edges — simulate depth/environment */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(ellipse 60% 70% at 35% 40%, transparent 20%, rgba(28,27,24,0.7) 100%)",
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+          />
           <Image
-            src={PLACEHOLDER_IMG}
+            src={HERO_IMAGE}
             alt=""
             fill
             sizes="120vw"
@@ -81,21 +89,32 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             position: "absolute",
             inset: "-6%",
             willChange: "transform",
-            filter: "blur(5px) grayscale(100%)",
+            filter: "blur(5px) grayscale(100%) brightness(0.65)",
           }}
         >
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(122, 79, 255, 0.10)",
+              background: "rgba(122, 79, 255, 0.12)",
               mixBlendMode: "color",
               zIndex: 1,
               pointerEvents: "none",
             }}
           />
+          {/* Edge darkening mask — pushes periphery into the "background" */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(ellipse 55% 65% at 35% 40%, transparent 30%, rgba(28,27,24,0.55) 100%)",
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+          />
           <Image
-            src={PLACEHOLDER_IMG}
+            src={HERO_IMAGE}
             alt=""
             fill
             sizes="120vw"
@@ -115,7 +134,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             filter: "grayscale(100%)",
           }}
         >
-          {/* Duotone highlight overlay */}
+          {/* Duotone highlight overlay — purple gradient */}
           <div
             style={{
               position: "absolute",
@@ -128,13 +147,13 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             }}
           />
           <Image
-            src={PLACEHOLDER_IMG}
+            src={HERO_IMAGE}
             alt="Lewis Hamilton — Formula 1 driver portrait"
             fill
             sizes="100vw"
             style={{
               objectFit: "cover",
-              objectPosition: "30% top", // subject weighted to left third
+              objectPosition: "center 25%", // subject centered, slightly above middle
               filter: "grayscale(100%) contrast(1.1) brightness(0.9)",
             }}
             priority

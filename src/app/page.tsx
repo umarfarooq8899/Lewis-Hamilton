@@ -1,10 +1,11 @@
 import Hero from "@/components/Hero/Hero";
+import TimelineContainer from "@/components/Timeline/TimelineContainer";
 
 export default function Home() {
   return (
-    <main>
+    <main className="relative">
       <Hero />
-      {/* Future sections will be added here */}
+      <TimelineContainer />
     </main>
   );
 }
