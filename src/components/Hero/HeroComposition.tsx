@@ -76,7 +76,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             alt=""
             fill
             sizes="120vw"
-            style={{ objectFit: "cover", objectPosition: "center 20%", filter: "grayscale(100%)" }}
+            style={{ objectFit: "cover", objectPosition: "center center", filter: "grayscale(100%)" }}
             priority={false}
             aria-hidden
           />
@@ -118,7 +118,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             alt=""
             fill
             sizes="120vw"
-            style={{ objectFit: "cover", objectPosition: "30% 15%", filter: "grayscale(100%)" }}
+            style={{ objectFit: "cover", objectPosition: "center center", filter: "grayscale(100%)" }}
             priority={false}
             aria-hidden
           />
@@ -153,7 +153,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             sizes="100vw"
             style={{
               objectFit: "cover",
-              objectPosition: "center 25%", // subject centered, slightly above middle
+              objectPosition: "center center", // subject centered, slightly above middle
               filter: "grayscale(100%) contrast(1.1) brightness(0.9)",
             }}
             priority
