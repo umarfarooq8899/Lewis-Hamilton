@@ -65,11 +65,17 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
   };
 
   useEffect(() => {
+    // Only run GSAP pinning and scroll transition effects on desktop (>= 768px)
+    if (window.innerWidth < 768) {
+      // Bubble up active state on mount for mobile
+      onActiveEraChange(config.id, 0);
+      return;
+    }
+
     const container = containerRef.current;
     if (!container) return;
 
     const momentsCount = config.moments.length;
-    // Scrub distance is proportional to number of moments
     const scrollDistance = momentsCount * 1200;
 
     // Pinning configuration
@@ -80,7 +86,6 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
       pin: true,
       scrub: true,
       onUpdate: (self) => {
-        // Bubble up active state and scroll progress inside this era
         onActiveEraChange(config.id, self.progress);
       },
     });
@@ -107,18 +112,13 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
 
     // Multi-moment transition logic
     config.moments.forEach((moment, index) => {
-      // ── Background tint interpolation during active scroll of this era ──
-      // This maps the active moments timeline section
       const startTime = index * 10;
-
-      // ── Counter Setup for Stat scrub-roll ──
       const parsedStat = parseFloat(moment.statNumber) || 0;
-      const hasSuffix = isNaN(Number(moment.statNumber)); // e.g. "1st", "8th"
+      const hasSuffix = isNaN(Number(moment.statNumber));
       const counter = { val: 0 };
 
-      // Timeline entries
+      // Transition Out Previous Moment
       if (index > 0) {
-        // Transition Out Previous Moment
         tl.to(
           momentsRef.current[index - 1],
           { opacity: 0, y: -30, duration: 3, ease: "power2.inOut" },
@@ -144,7 +144,6 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
           startTime
         );
       } else {
-        // Make sure first image/content behaves nicely as we enter
         tl.to(
           imagesRef.current[0],
           { scale: 1, duration: 3, ease: "none" },
@@ -165,7 +164,6 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
               if (el) {
                 const rounded = Math.round(counter.val);
                 if (hasSuffix) {
-                  // Reconstruct e.g. "1st" or "8th"
                   const suffix = moment.statNumber.replace(/[0-9]/g, "");
                   el.textContent = `${rounded}${suffix}`;
                 } else {
@@ -177,8 +175,6 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
           startTime + 0.5
         );
       } else {
-        // Fallback for non-numeric stats (e.g. "1st" literal or non-numeric)
-        // just fade the string in
         tl.fromTo(
           statsRef.current[index],
           { opacity: 0 },
@@ -197,136 +193,228 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
   return (
     <div
       ref={containerRef}
-      className="w-full h-screen relative overflow-hidden flex flex-col md:flex-row items-center select-none"
-      style={{
-        background: "transparent",
-      }}
+      className="w-full relative select-none"
+      style={{ background: "transparent" }}
     >
-      {/* Visual background noise card frame (Left-to-Right layout) */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {/* Subtle radial glow themed to the current era's accent */}
-        <div
-          className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full blur-[160px] opacity-15 mix-blend-screen transition-colors duration-1000 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${config.accentColor} 0%, transparent 70%)`,
-          }}
-        />
-      </div>
+      {/* ── DESKTOP SCROLL-PINS LAYOUT (md and up) ── */}
+      <div className="hidden md:flex md:flex-row w-full h-screen relative overflow-hidden items-center">
+        {/* Visual background radial glow */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div
+            className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full blur-[160px] opacity-15 mix-blend-screen transition-colors duration-1000 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${config.accentColor} 0%, transparent 70%)`,
+            }}
+          />
+        </div>
 
-      {/* LEFT COLUMN: Visual Media (Parallax Driver / Car Portrait) */}
-      <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden z-10 flex items-center justify-center p-6 md:p-12">
-        <div className="relative w-full h-[90%] max-w-lg aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900/60 border border-white/5 shadow-2xl">
-          {config.moments.map((moment, idx) => (
-            <div
-              key={moment.id}
-              ref={addToImagesRef}
-              className="absolute inset-0 transition-opacity duration-150 ease-in-out"
-              style={{
-                zIndex: idx + 1,
-                willChange: "transform, opacity",
-              }}
-            >
-              {/* Grayscale + Tint duotone overlay — tinted to era accent */}
+        {/* LEFT COLUMN: Visual Media (Parallax Driver / Car Portrait) */}
+        <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden z-10 flex items-center justify-center p-6 md:p-12">
+          <div className="relative w-full h-[90%] max-w-lg aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900/60 border border-white/5 shadow-2xl">
+            {config.moments.map((moment, idx) => (
               <div
-                className="absolute inset-0 z-10 mix-blend-color pointer-events-none transition-all"
+                key={moment.id}
+                ref={addToImagesRef}
+                className="absolute inset-0 transition-opacity duration-150 ease-in-out"
                 style={{
-                  background: getEraTintOverlay(config),
+                  zIndex: idx + 1,
+                  willChange: "transform, opacity",
                 }}
-              />
-
-              {/* Low-res grain overlay — heavier noise to mask pixelation */}
-              {moment.isLowRes && (
-                /* TODO: replace with licensed high-res image — current source is low-res placeholder */
+              >
+                {/* Grayscale + Tint duotone overlay */}
                 <div
-                  className="absolute inset-0 z-30 pointer-events-none"
+                  className="absolute inset-0 z-10 mix-blend-color pointer-events-none transition-all"
                   style={{
-                    opacity: 0.08,
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-                    backgroundSize: "150px 150px",
-                    backgroundRepeat: "repeat",
+                    background: getEraTintOverlay(config),
                   }}
                 />
-              )}
 
-              <Image
-                src={moment.imagePath}
-                alt={moment.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
+                {/* Low-res grain overlay */}
+                {moment.isLowRes && (
+                  /* TODO: replace with licensed high-res image - current source is low-res placeholder */
+                  <div
+                    className="absolute inset-0 z-30 pointer-events-none"
+                    style={{
+                      opacity: 0.08,
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                      backgroundSize: "150px 150px",
+                      backgroundRepeat: "repeat",
+                    }}
+                  />
+                )}
+
+                <Image
+                  src={moment.imagePath}
+                  alt={moment.title}
+                  fill
+                  sizes="50vw"
+                  style={{
+                    objectFit: "cover",
+                    filter: getEraImageFilter(config, moment.isLowRes),
+                  }}
+                  loading={idx === 0 ? undefined : "lazy"}
+                  priority={idx === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B18]/90 via-transparent to-transparent z-20" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Era Info & Moments */}
+        <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24">
+          <div className="mb-6 md:mb-12">
+            <span
+              className="font-mono text-xs md:text-sm tracking-widest uppercase opacity-40 transition-colors"
+              style={{ color: config.accentColor }}
+            >
+              {config.years}
+            </span>
+            <h2 className="font-ui font-semibold text-2xl md:text-4xl text-neutral-100 uppercase tracking-wider mt-1">
+              {config.title}
+            </h2>
+          </div>
+
+          <div className="relative w-full h-[60%] flex items-start">
+            {config.moments.map((moment, idx) => (
+              <div
+                key={moment.id}
+                ref={addToMomentsRef}
+                className="absolute inset-0 flex flex-col justify-start pointer-events-none"
                 style={{
-                  objectFit: "cover",
-                  filter: getEraImageFilter(config, moment.isLowRes),
+                  willChange: "transform, opacity",
                 }}
-                loading={idx === 0 ? undefined : "lazy"}
-                priority={idx === 0}
-              />
-              {/* Bottom vignette gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B18]/90 via-transparent to-transparent z-20" />
-            </div>
-          ))}
+              >
+                <div className="flex flex-col gap-3 md:gap-4 max-w-xl">
+                  <div>
+                    <h3 className="font-display font-medium text-lg md:text-2xl text-neutral-200 leading-tight">
+                      {moment.title}
+                    </h3>
+                    <p className="font-mono text-[10px] md:text-xs tracking-wider uppercase opacity-40 mt-1">
+                      {moment.subtitle}
+                    </p>
+                  </div>
+
+                  <p className="font-ui text-sm md:text-base text-neutral-400 leading-relaxed font-light">
+                    {moment.description}
+                  </p>
+
+                  <div
+                    className="flex items-center gap-4 mt-6 p-4 rounded-xl border border-white/5 bg-white/[0.02]"
+                    style={{
+                      borderLeft: `3px solid ${config.accentColor}`,
+                    }}
+                  >
+                    <span
+                      ref={addToStatsRef}
+                      className="font-display text-4xl md:text-5xl font-black italic tracking-tighter text-neutral-100"
+                    >
+                      {idx === 0 ? moment.statNumber : "0"}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-wider text-neutral-500">
+                        Metric
+                      </span>
+                      <span className="font-ui text-xs md:text-sm text-neutral-300 font-medium">
+                        {moment.statLabel}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Era Info & Moments */}
-      <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24">
-        {/* Era Header: Sticky feel through layout alignment */}
-        <div className="mb-6 md:mb-12">
+      {/* ── MOBILE STATIC SCROLL LAYOUT (below md) ── */}
+      <div className="flex flex-col md:hidden w-full px-6 py-12 gap-12 border-b border-white/5 bg-neutral-950/20">
+        {/* Era header */}
+        <div>
           <span
-            className="font-mono text-xs md:text-sm tracking-widest uppercase opacity-40 transition-colors"
+            className="font-mono text-[11px] tracking-widest uppercase opacity-45"
             style={{ color: config.accentColor }}
           >
             {config.years}
           </span>
-          <h2 className="font-ui font-semibold text-2xl md:text-4xl text-neutral-100 uppercase tracking-wider mt-1">
+          <h2 className="font-ui font-semibold text-2xl text-neutral-100 uppercase tracking-wider mt-1">
             {config.title}
           </h2>
         </div>
 
-        {/* Moments Container */}
-        <div className="relative w-full h-[60%] flex items-start">
-          {config.moments.map((moment, idx) => (
+        {/* Moments vertical list */}
+        <div className="flex flex-col gap-10">
+          {config.moments.map((moment) => (
             <div
               key={moment.id}
-              ref={addToMomentsRef}
-              className="absolute inset-0 flex flex-col justify-start pointer-events-none"
-              style={{
-                willChange: "transform, opacity",
-              }}
+              className="flex flex-col gap-4 border-b border-white/5 pb-8 last:border-0 last:pb-0"
             >
-              <div className="flex flex-col gap-3 md:gap-4 max-w-xl">
-                {/* Moment Header */}
+              {/* Media card */}
+              <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900/60 border border-white/5 shadow-lg">
+                <div
+                  className="absolute inset-0 z-10 mix-blend-color pointer-events-none"
+                  style={{
+                    background: getEraTintOverlay(config),
+                  }}
+                />
+
+                {moment.isLowRes && (
+                  /* TODO: replace with licensed high-res image - current source is low-res placeholder */
+                  <div
+                    className="absolute inset-0 z-30 pointer-events-none"
+                    style={{
+                      opacity: 0.08,
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                      backgroundSize: "150px 150px",
+                      backgroundRepeat: "repeat",
+                    }}
+                  />
+                )}
+
+                <Image
+                  src={moment.imagePath}
+                  alt={moment.title}
+                  fill
+                  sizes="100vw"
+                  style={{
+                    objectFit: "cover",
+                    filter: getEraImageFilter(config, moment.isLowRes),
+                  }}
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B18]/90 via-transparent to-transparent z-20" />
+              </div>
+
+              {/* Text content */}
+              <div className="flex flex-col gap-2">
                 <div>
-                  <h3 className="font-display font-medium text-lg md:text-2xl text-neutral-200 leading-tight">
+                  <h3 className="font-display font-medium text-lg text-neutral-200 leading-tight">
                     {moment.title}
                   </h3>
-                  <p className="font-mono text-[10px] md:text-xs tracking-wider uppercase opacity-40 mt-1">
+                  <p className="font-mono text-[9px] tracking-wider uppercase opacity-45 mt-1">
                     {moment.subtitle}
                   </p>
                 </div>
 
-                {/* Narrative Description */}
-                <p className="font-ui text-sm md:text-base text-neutral-400 leading-relaxed font-light">
+                <p className="font-ui text-sm text-neutral-400 leading-relaxed font-light">
                   {moment.description}
                 </p>
 
-                {/* Mini Stat Card within narrative column */}
+                {/* Metric Badge */}
                 <div
-                  className="flex items-center gap-4 mt-6 p-4 rounded-xl border border-white/5 bg-white/[0.02]"
+                  className="flex items-center gap-4 mt-3 p-4 rounded-xl border border-white/5 bg-white/[0.02]"
                   style={{
                     borderLeft: `3px solid ${config.accentColor}`,
                   }}
                 >
-                  <span
-                    ref={addToStatsRef}
-                    className="font-display text-4xl md:text-5xl font-black italic tracking-tighter text-neutral-100"
-                  >
-                    {idx === 0 ? moment.statNumber : "0"}
+                  <span className="font-display text-3xl font-black italic tracking-tighter text-neutral-100">
+                    {moment.statNumber}
                   </span>
                   <div className="flex flex-col">
-                    <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-wider text-neutral-500">
+                    <span className="font-mono text-[8px] uppercase tracking-wider text-neutral-500">
                       Metric
                     </span>
-                    <span className="font-ui text-xs md:text-sm text-neutral-300 font-medium">
+                    <span className="font-ui text-xs text-neutral-300 font-medium">
                       {moment.statLabel}
                     </span>
                   </div>
