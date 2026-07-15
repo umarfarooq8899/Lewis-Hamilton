@@ -24,29 +24,13 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
 
   return (
     <div
-      style={{
-        position: "absolute",
-        right: 0,
-        top: "50%",
-        transform: "translateY(-50%)",
-        width: "42%",
-        paddingRight: "5vw",
-        zIndex: 10,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        gap: "0.6rem",
-        pointerEvents: "none",
-      }}
+      className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-[42%] px-6 md:pr-[5vw] z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none"
     >
       {/* Thin horizontal rule above name */}
       <div
         ref={dividerRef}
+        className="w-10 h-[1px] bg-white/30 self-center md:self-end"
         style={{
-          width: "2.5rem",
-          height: "1px",
-          background: "rgba(242,237,228,0.3)",
-          alignSelf: "flex-end",
           opacity: 0,
           willChange: "opacity, transform",
         }}
@@ -55,31 +39,22 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
       {/* Label line */}
       <span
         ref={labelRef}
+        className="font-mono tracking-[0.22em] uppercase text-white/45 text-center md:text-right"
         style={{
-          fontFamily: "var(--font-mono)",
           fontSize: "clamp(0.55rem, 0.8vw, 0.75rem)",
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "rgba(242,237,228,0.45)",
           opacity: 0,
           willChange: "opacity, transform",
         }}
       >
-        {/* PLACEHOLDER TEXT — replace with official tagline if desired */}
         Formula 1 · 2008 – 2024
       </span>
 
       {/* Name */}
       <span
         ref={nameRef}
+        className="font-ui font-semibold tracking-[0.14em] uppercase text-[#F2EDE4] text-center md:text-right"
         style={{
-          fontFamily: "var(--font-ui)",
-          fontWeight: 600,
           fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: "var(--color-offwhite)",
-          textAlign: "right",
           lineHeight: 1.1,
           opacity: 0,
           willChange: "opacity, transform",
@@ -89,42 +64,25 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
       </span>
 
       {/* Large count-up stat */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: "0.1rem",
-          marginTop: "0.5rem",
-        }}
-      >
+      <div className="flex flex-col items-center md:items-end gap-[0.1rem] mt-2">
         <span
           ref={statRef}
+          className="font-display italic font-extrabold text-[#F2EDE4] text-center md:text-right"
           style={{
-            fontFamily: "var(--font-display)",
-            fontStyle: "italic",
-            fontWeight: 800,
             fontSize: "clamp(5rem, 11vw, 10rem)",
             lineHeight: 0.85,
-            color: "var(--color-offwhite)",
             opacity: 0,
             willChange: "opacity, transform",
-            // Very subtle accent shadow
             textShadow: "0 0 80px rgba(122,79,255,0.25)",
           }}
         >
           0
         </span>
         <span
+          className="font-mono tracking-[0.18em] uppercase text-white/35 text-center md:text-right"
           style={{
-            fontFamily: "var(--font-mono)",
             fontSize: "clamp(0.5rem, 0.7vw, 0.65rem)",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "rgba(242,237,228,0.35)",
             opacity: 0,
-            // Shares GSAP timeline with statRef (same tween)
-            // Not exposed via ref because it enters with the stat
             transition: "opacity 0.6s ease",
           }}
           data-stat-label

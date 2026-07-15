@@ -56,7 +56,7 @@ export default function TimelineContainer() {
 
     // 2. Background Color interpolation across Eras
     const wrapperSections = container.querySelectorAll(".era-section-wrapper");
-    const cleanupTweens: gsap.core.Tween[] = [];
+    const cleanupTweens: { kill: () => void }[] = [];
 
     wrapperSections.forEach((section, index) => {
       const era = erasConfig[index];
@@ -93,7 +93,24 @@ export default function TimelineContainer() {
         }
       );
 
-      cleanupTweens.push(tintTween, resetTween);
+      // Track HUD active state & progress for mobile viewport scrolls
+      const hudTrigger = ScrollTrigger.create({
+        trigger: section,
+        start: "top 50%",
+        end: "bottom 50%",
+        onToggle: (self) => {
+          if (self.isActive) {
+            handleActiveEraChange(era.id, self.progress);
+          }
+        },
+        onUpdate: (self) => {
+          if (self.isActive && window.innerWidth < 768) {
+            handleActiveEraChange(era.id, self.progress);
+          }
+        },
+      });
+
+      cleanupTweens.push(tintTween, resetTween, hudTrigger);
     });
 
     return () => {
