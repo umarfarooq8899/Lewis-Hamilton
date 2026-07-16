@@ -24,7 +24,7 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
 
   return (
     <div
-      className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-[42%] px-6 md:pr-[5vw] z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none"
+      className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-[44%] px-8 md:px-10 lg:px-14 z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none overflow-hidden"
     >
       {/* Thin horizontal rule above name */}
       <div

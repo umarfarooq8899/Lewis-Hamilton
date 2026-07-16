@@ -20,7 +20,10 @@ export default function TimelineContainer() {
     color: erasConfig[0].accentColor,
     progress: 0,
   });
-
+  
+  // Track whether the timeline container itself is active in the viewport
+  const [isTimelineActive, setIsTimelineActive] = useState(false);
+ 
   const handleActiveEraChange = useCallback((eraId: string, progress: number) => {
     const era = erasConfig.find((e) => e.id === eraId);
     if (era) {
@@ -33,11 +36,21 @@ export default function TimelineContainer() {
       });
     }
   }, []);
-
+ 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    // Trigger to track timeline container activation for progress spine visibility
+    const activeTrigger = ScrollTrigger.create({
+      trigger: container,
+      start: "top 75%",
+      end: "bottom 25%",
+      onToggle: (self) => {
+        setIsTimelineActive(self.isActive);
+      },
+    });
+ 
     // 1. Total Scroll Progress indicator (Timeline Spine)
     const progressTrigger = ScrollTrigger.create({
       trigger: container,
@@ -115,6 +128,7 @@ export default function TimelineContainer() {
 
     return () => {
       progressTrigger.kill();
+      activeTrigger.kill();
       cleanupTweens.forEach((t) => t.kill());
     };
   }, []);
@@ -131,7 +145,8 @@ export default function TimelineContainer() {
     >
       {/* ── STICKY PROGRESS SPINE (Left margins) ── */}
       <div
-        className="fixed left-6 md:left-12 lg:left-16 top-[25vh] h-[50vh] w-[2px] z-50 pointer-events-none hidden sm:flex flex-col items-center justify-between"
+        className="fixed left-6 md:left-12 lg:left-16 top-[25vh] h-[50vh] w-[2px] z-50 pointer-events-none hidden sm:flex flex-col items-center justify-between transition-opacity duration-500"
+        style={{ opacity: isTimelineActive ? 1 : 0 }}
       >
         {/* Background track */}
         <div className="absolute inset-0 bg-white/10 rounded-full" />
