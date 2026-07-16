@@ -113,8 +113,8 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
     // Multi-moment transition logic
     config.moments.forEach((moment, index) => {
       const startTime = index * 10;
-      const parsedStat = parseFloat(moment.statNumber) || 0;
-      const hasSuffix = isNaN(Number(moment.statNumber));
+      const isOrdinal = isNaN(Number(moment.statNumber));
+      const parsedStat = isOrdinal ? 0 : Number(moment.statNumber);
       const counter = { val: 0 };
 
       // Transition Out Previous Moment
@@ -151,8 +151,8 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
         );
       }
 
-      // Roll stat numbers forward and backward based on scrub position
-      if (parsedStat > 0) {
+      // Roll stat numbers — only animate for pure numeric values
+      if (!isOrdinal && parsedStat > 0) {
         tl.to(
           counter,
           {
@@ -161,20 +161,13 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
             ease: "none",
             onUpdate: () => {
               const el = statsRef.current[index];
-              if (el) {
-                const rounded = Math.round(counter.val);
-                if (hasSuffix) {
-                  const suffix = moment.statNumber.replace(/[0-9]/g, "");
-                  el.textContent = `${rounded}${suffix}`;
-                } else {
-                  el.textContent = String(rounded);
-                }
-              }
+              if (el) el.textContent = String(Math.round(counter.val));
             },
           },
           startTime + 0.5
         );
       } else {
+        // Ordinal/text stats: just fade in — never animate the number
         tl.fromTo(
           statsRef.current[index],
           { opacity: 0 },
@@ -209,7 +202,7 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
         </div>
 
         {/* LEFT COLUMN: Visual Media (Parallax Driver / Car Portrait) */}
-        <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden z-10 flex items-center justify-center p-6 md:p-12">
+        <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden z-10 flex items-center justify-center p-6 md:py-12 md:pl-28 md:pr-12 lg:pl-36 lg:pr-16">
           <div className="relative w-full h-[90%] max-w-lg aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900/60 border border-white/5 shadow-2xl">
             {config.moments.map((moment, idx) => (
               <div
@@ -309,7 +302,7 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
                       ref={addToStatsRef}
                       className="font-display text-4xl md:text-5xl font-black italic tracking-tighter text-neutral-100"
                     >
-                      {idx === 0 ? moment.statNumber : "0"}
+                      {moment.statNumber}
                     </span>
                     <div className="flex flex-col">
                       <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-wider text-neutral-500">

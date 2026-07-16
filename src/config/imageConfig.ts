@@ -35,29 +35,47 @@ export interface MomentImageEntry {
 
 /** Moment images keyed by the moment ID from config.ts */
 export const momentImages: Record<string, MomentImageEntry> = {
-  // ── McLaren (3 moments - mapped to low-res placeholders since no McLaren images are available yet) ──
+  // ── McLaren (3 moments - now mapped to high-quality moments folder images) ──
   "mclaren-debut": {
-    path: "/images/low-res/lowres-08.jpg",
-    isLowRes: true,
+    path: "/images/moments/mclaren-debut.jpg",
+    isLowRes: false,
     width: 736,
     height: 847,
   },
   "2008-silverstone": {
-    path: "/images/low-res/lowres-07.jpg",
-    isLowRes: true,
-    width: 676,
-    height: 1200,
+    path: "/images/moments/mclaren-silverstone.jpg",
+    isLowRes: false,
+    width: 1024,
+    height: 1024,
   },
   "2008-brazil": {
-    path: "/images/low-res/lowres-06.jpg",
-    isLowRes: true,
-    width: 736,
-    height: 920,
+    path: "/images/moments/mclaren-brazil.jpg",
+    isLowRes: false,
+    width: 1024,
+    height: 1024,
   },
 
-  // ── Mercedes (2 moments) ──
+  // ── Mercedes (5 moments) ──
   "2014-abu-dhabi": {
     path: "/images/moments/moment-04.jpg",
+    isLowRes: false,
+    width: 736,
+    height: 1308,
+  },
+  "2017-dominance": {
+    path: "/images/moments/moment-02.jpg",
+    isLowRes: false,
+    width: 736,
+    height: 1472,
+  },
+  "2018-pitlane": {
+    path: "/images/moments/moment-01.jpg",
+    isLowRes: false,
+    width: 736,
+    height: 1308,
+  },
+  "2019-podium": {
+    path: "/images/moments/moment-10.jpg",
     isLowRes: false,
     width: 736,
     height: 1308,
@@ -69,26 +87,32 @@ export const momentImages: Record<string, MomentImageEntry> = {
     height: 1593,
   },
 
-  // ── Abu Dhabi 2021 (2 moments) ──
+  // ── Abu Dhabi 2021 (2 moments - somber and sportsmanship photography) ──
   "2021-finale": {
-    path: "/images/moments/moment-02.jpg",
+    path: "/images/moments/abudhabi-somber.jpg",
     isLowRes: false,
-    width: 736,
-    height: 1472,
+    width: 1024,
+    height: 1024,
   },
   "2021-aftermath": {
-    path: "/images/moments/moment-08.jpg",
+    path: "/images/moments/abudhabi-congratulation.jpg",
     isLowRes: false,
-    width: 736,
-    height: 1308,
+    width: 1024,
+    height: 1024,
   },
 
-  // ── The Drought (2 moments) ──
+  // ── The Drought (3 moments) ──
   "drought-struggle": {
     path: "/images/moments/moment-03.jpg",
     isLowRes: false,
     width: 736,
     height: 1472,
+  },
+  "drought-reflection": {
+    path: "/images/moments/moment-14.jpg",
+    isLowRes: false,
+    width: 736,
+    height: 1595,
   },
   "2024-silverstone": {
     path: "/images/moments/moment-09.jpg",
@@ -97,7 +121,7 @@ export const momentImages: Record<string, MomentImageEntry> = {
     height: 1595,
   },
 
-  // ── Ferrari (2 moments) ──
+  // ── Ferrari (3 moments) ──
   "ferrari-announcement": {
     path: "/images/moments/moment-06.jpg",
     isLowRes: false,
@@ -105,10 +129,16 @@ export const momentImages: Record<string, MomentImageEntry> = {
     height: 1472,
   },
   "ferrari-transition": {
-    path: "/images/moments/moment-12.jpg",
+    path: "/images/moments/moment-05.jpg",
     isLowRes: false,
-    width: 675,
-    height: 1200,
+    width: 736,
+    height: 1308,
+  },
+  "ferrari-reflection": {
+    path: "/images/moments/moment-13.jpg",
+    isLowRes: false,
+    width: 736,
+    height: 1308,
   },
 };
 
