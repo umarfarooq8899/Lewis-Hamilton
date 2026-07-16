@@ -85,3 +85,434 @@ body::after {
 .font-display { font-family: var(--font-display); }
 .font-ui      { font-family: var(--font-ui); }
 .font-mono    { font-family: var(--font-mono); }
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVING STATS DASHBOARD
+   Neutral graphite home-base — no era colour tint.
+   Accent purple for numbers only.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Section shell ── */
+.stats-section {
+  position: relative;
+  width: 100%;
+  background-color: var(--color-graphite);
+  padding: clamp(5rem, 10vw, 9rem) 0 clamp(4rem, 8vw, 7rem);
+  overflow: hidden;
+}
+
+/* Subtle top fade from the timeline's last bgTint back to graphite */
+.stats-section::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, rgba(28,27,24,0) 0%, var(--color-graphite) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Very faint radial purple bloom — not tied to any era */
+.stats-section::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, 120vw);
+  height: min(900px, 120vw);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(122,79,255,0.06) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stats-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 4rem);
+}
+
+/* ── Section header ── */
+.stats-section-header {
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.stats-section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(122,79,255,0.7);
+}
+
+.stats-section-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  color: var(--color-offwhite);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.stats-section-sub {
+  font-family: var(--font-ui);
+  font-size: clamp(0.78rem, 1.1vw, 0.9rem);
+  color: rgba(242,237,228,0.4);
+  max-width: 52ch;
+  line-height: 1.6;
+  margin-top: 0.4rem;
+}
+
+/* ── PRIMARY GRID ── */
+/* 4-column on desktop, 2-column on tablet, single/dual on mobile */
+.stats-primary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(120px, auto);
+  gap: clamp(0.6rem, 1.2vw, 1rem);
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+@media (max-width: 1024px) {
+  .stats-primary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-primary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-primary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+/* ── CARD BASE ── */
+.stats-card {
+  position: relative;
+  border-radius: 16px;
+  border: 1px solid rgba(242,237,228,0.06);
+  background: rgba(242,237,228,0.03);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: default;
+  will-change: transform, opacity;
+}
+
+.stats-card:hover {
+  border-color: rgba(122,79,255,0.25);
+  box-shadow: 0 0 40px rgba(122,79,255,0.08), 0 4px 32px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+}
+
+/* Glass highlight rim — top specular edge, lights up on hover */
+.stats-card__glass {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.05) 0%,
+    rgba(255,255,255,0) 50%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.stats-card:hover .stats-card__glass {
+  opacity: 1;
+}
+
+/* Inner content padding — scales by card size */
+.stats-card__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  gap: 0.25rem;
+}
+
+.stats-card__inner--narrative {
+  justify-content: flex-start;
+  padding-top: calc(clamp(1rem, 2vw, 1.5rem) + 4px); /* offset for accent bar */
+  gap: 0.5rem;
+}
+
+/* ── CARD SIZE VARIANTS ── */
+
+/* Hero — career wins */
+.stats-card--hero {
+  min-height: clamp(200px, 22vw, 320px);
+  background: linear-gradient(145deg, rgba(122,79,255,0.07) 0%, rgba(242,237,228,0.02) 60%);
+  border-color: rgba(122,79,255,0.15);
+}
+
+.stats-card--hero:hover {
+  box-shadow: 0 0 60px rgba(122,79,255,0.12), 0 8px 48px rgba(0,0,0,0.5);
+}
+
+/* Large — championships */
+.stats-card--large {
+  min-height: clamp(160px, 18vw, 260px);
+}
+
+/* Medium */
+.stats-card--medium {
+  min-height: clamp(120px, 14vw, 200px);
+}
+
+/* Small */
+.stats-card--small {
+  min-height: clamp(100px, 10vw, 160px);
+}
+
+/* ── TYPOGRAPHY — Numbers ── */
+
+/* Hero number — matches the "105" hero stat treatment */
+.stats-hero-number {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(4.5rem, 9vw, 9rem);
+  line-height: 0.88;
+  color: var(--color-accent);
+  text-shadow: 0 0 80px rgba(122,79,255,0.3);
+  letter-spacing: -0.02em;
+}
+
+.stats-hero-suffix {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  color: rgba(122,79,255,0.55);
+  line-height: 1;
+  vertical-align: baseline;
+  margin-left: 0.1em;
+}
+
+/* Large number */
+.stats-large-number {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(3.5rem, 7vw, 7rem);
+  line-height: 0.9;
+  color: var(--color-accent);
+  text-shadow: 0 0 60px rgba(122,79,255,0.2);
+  letter-spacing: -0.02em;
+}
+
+.stats-large-suffix {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 4rem);
+  color: rgba(122,79,255,0.5);
+  margin-left: 0.08em;
+}
+
+/* Medium number */
+.stats-medium-number {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(2.8rem, 5.5vw, 5.5rem);
+  line-height: 0.9;
+  color: var(--color-accent);
+  text-shadow: 0 0 50px rgba(122,79,255,0.18);
+  letter-spacing: -0.02em;
+}
+
+.stats-medium-suffix {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  color: rgba(122,79,255,0.5);
+  margin-left: 0.08em;
+}
+
+/* Small number */
+.stats-small-number {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 0.9;
+  color: var(--color-accent);
+  text-shadow: 0 0 40px rgba(122,79,255,0.15);
+  letter-spacing: -0.02em;
+}
+
+.stats-small-suffix {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(1.2rem, 2vw, 2rem);
+  color: rgba(122,79,255,0.5);
+  margin-left: 0.06em;
+}
+
+/* Number container */
+.stats-number-wrap {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+/* ── LABELS ── */
+.stats-label {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.85vw, 0.75rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(242,237,228,0.35);
+}
+
+.stats-label--small {
+  font-size: clamp(0.55rem, 0.75vw, 0.65rem);
+  letter-spacing: 0.16em;
+}
+
+.stats-sublabel {
+  font-family: var(--font-ui);
+  font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+  color: rgba(242,237,228,0.3);
+  line-height: 1.4;
+  margin-top: 0.15rem;
+}
+
+.stats-sublabel--spaced {
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+
+.stats-sublabel--xs {
+  font-size: clamp(0.6rem, 0.8vw, 0.7rem);
+}
+
+/* ── NARRATIVE ROW ── */
+.stats-narrative-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.stats-narrative-intro {
+  font-family: var(--font-ui);
+  font-size: clamp(0.78rem, 1vw, 0.88rem);
+  color: rgba(242,237,228,0.35);
+  max-width: 48ch;
+  line-height: 1.6;
+}
+
+.stats-narrative-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.6rem, 1.2vw, 1rem);
+}
+
+@media (max-width: 1024px) {
+  .stats-narrative-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-narrative-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Narrative card specific */
+.stats-card--narrative {
+  min-height: clamp(140px, 16vw, 220px);
+}
+
+/* Purple accent top bar */
+.stats-narrative-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent) 0%, rgba(122,79,255,0.2) 100%);
+  border-radius: 16px 16px 0 0;
+  z-index: 2;
+}
+
+.stats-narrative-headline {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: clamp(0.82rem, 1.2vw, 1rem);
+  color: var(--color-offwhite);
+  line-height: 1.35;
+}
+
+.stats-narrative-body {
+  font-family: var(--font-ui);
+  font-size: clamp(0.68rem, 0.95vw, 0.8rem);
+  color: rgba(242,237,228,0.4);
+  line-height: 1.6;
+}
+
+/* TODO badge — marks unverified stats */
+.stats-todo-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,180,0,0.75);
+  background: rgba(255,180,0,0.08);
+  border: 1px solid rgba(255,180,0,0.2);
+  border-radius: 4px;
+  padding: 0.15em 0.5em;
+  width: fit-content;
+}
+
+/* Grid span overrides that need Tailwind col-span class equivalents */
+/* The component uses Tailwind col-span classes; below supplements with
+   explicit grid placement for the hero/large layout when columns are 4 */
+@media (min-width: 1025px) {
+  .stats-card--hero  { grid-column: span 3; grid-row: span 2; }
+  .stats-card--large { grid-column: span 1; grid-row: span 2; }
+  .stats-card--medium { grid-column: span 2; }
+  .stats-card--small  { grid-column: span 1; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stats-card--hero   { grid-column: span 2; grid-row: span 2; }
+  .stats-card--large  { grid-column: span 2; grid-row: span 2; }
+  .stats-card--medium { grid-column: span 2; }
+  .stats-card--small  { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+  .stats-card--hero   { grid-column: span 2; }
+  .stats-card--large  { grid-column: span 2; }
+  .stats-card--medium { grid-column: span 1; }
+  .stats-card--small  { grid-column: span 1; }
+}
+
