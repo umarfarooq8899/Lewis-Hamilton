@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { primaryStats, narrativeStats, type StatCard } from "./statsConfig";
+import { EASE_STANDARD, DURATION_FAST, DURATION_BASE, DURATION_COUNT } from "@/config/tokens";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +34,7 @@ function HeroStatCard({ stat }: { stat: StatCard }) {
     gsap.fromTo(card,
       { opacity: 0, y: 40 },
       {
-        opacity: 1, y: 0, duration: 0.9, ease: "power3.out",
+        opacity: 1, y: 0, duration: DURATION_BASE, ease: EASE_STANDARD,
         scrollTrigger: { trigger: card, start: "top 85%", once: true },
       }
     );
@@ -42,7 +43,7 @@ function HeroStatCard({ stat }: { stat: StatCard }) {
     const counter = { val: 0 };
     gsap.to(counter, {
       val: stat.value ?? 0,
-      duration: 2.2,
+      duration: DURATION_COUNT,
       ease: "power2.out",
       delay: 0.3,
       onUpdate: () => { num.textContent = String(Math.round(counter.val)); },
@@ -55,11 +56,11 @@ function HeroStatCard({ stat }: { stat: StatCard }) {
   return (
     <div
       ref={cardRef}
-      className={`stats-card stats-card--hero ${sizeClasses.hero} group`}
+      className={`glass-card glass-card--hero stats-card--hero ${sizeClasses.hero} group`}
       style={{ opacity: 0 }}
     >
       {/* Glass highlight rim */}
-      <div className="stats-card__glass" />
+      <div className="glass-card__highlight" />
 
       {/* Content */}
       <div className="stats-card__inner">
@@ -98,7 +99,7 @@ function LargeStatCard({ stat, delay }: { stat: StatCard; delay: number }) {
     gsap.fromTo(card,
       { opacity: 0, y: 36 },
       {
-        opacity: 1, y: 0, duration: 0.85, ease: "power3.out",
+        opacity: 1, y: 0, duration: DURATION_BASE, ease: EASE_STANDARD,
         delay,
         scrollTrigger: { trigger: card, start: "top 88%", once: true },
       }
@@ -107,7 +108,7 @@ function LargeStatCard({ stat, delay }: { stat: StatCard; delay: number }) {
     const counter = { val: 0 };
     gsap.to(counter, {
       val: stat.value ?? 0,
-      duration: 1.8,
+      duration: DURATION_COUNT,
       ease: "power2.out",
       delay: delay + 0.2,
       onUpdate: () => { num.textContent = String(Math.round(counter.val)); },
@@ -120,10 +121,10 @@ function LargeStatCard({ stat, delay }: { stat: StatCard; delay: number }) {
   return (
     <div
       ref={cardRef}
-      className={`stats-card stats-card--large ${sizeClasses.large} group`}
+      className={`glass-card stats-card--large ${sizeClasses.large} group`}
       style={{ opacity: 0 }}
     >
-      <div className="stats-card__glass" />
+      <div className="glass-card__highlight" />
       <div className="stats-card__inner">
         <span className="stats-label">{stat.label}</span>
         <div className="stats-number-wrap">
@@ -161,7 +162,7 @@ function CountupCard({
     gsap.fromTo(card,
       { opacity: 0, y: 28 },
       {
-        opacity: 1, y: 0, duration: 0.75, ease: "power3.out",
+        opacity: 1, y: 0, duration: DURATION_FAST, ease: EASE_STANDARD,
         delay,
         scrollTrigger: { trigger: card, start: "top 90%", once: true },
       }
@@ -183,10 +184,10 @@ function CountupCard({
   return (
     <div
       ref={cardRef}
-      className={`stats-card ${isSmall ? "stats-card--small" : "stats-card--medium"} ${sizeClasses[stat.size]} group`}
+      className={`glass-card ${isSmall ? "stats-card--small" : "stats-card--medium"} ${sizeClasses[stat.size]} group`}
       style={{ opacity: 0 }}
     >
-      <div className="stats-card__glass" />
+      <div className="glass-card__highlight" />
       <div className="stats-card__inner">
         <span className="stats-label stats-label--small">{stat.label}</span>
         <div className="stats-number-wrap">
@@ -216,7 +217,7 @@ function NarrativeCard({ stat, delay }: { stat: StatCard; delay: number }) {
     gsap.fromTo(card,
       { opacity: 0, x: 20 },
       {
-        opacity: 1, x: 0, duration: 0.8, ease: "power2.out",
+        opacity: 1, x: 0, duration: DURATION_BASE, ease: "power2.out",
         delay,
         scrollTrigger: { trigger: card, start: "top 90%", once: true },
       }
@@ -228,10 +229,10 @@ function NarrativeCard({ stat, delay }: { stat: StatCard; delay: number }) {
   return (
     <div
       ref={cardRef}
-      className={`stats-card stats-card--narrative ${sizeClasses.medium} group`}
+      className={`glass-card stats-card--narrative ${sizeClasses.medium} group`}
       style={{ opacity: 0 }}
     >
-      <div className="stats-card__glass" />
+      <div className="glass-card__highlight" />
       {/* Accent top border */}
       <div className="stats-narrative-accent" />
       <div className="stats-card__inner stats-card__inner--narrative">
@@ -260,7 +261,7 @@ function SectionHeader() {
     gsap.fromTo(el,
       { opacity: 0, y: 24 },
       {
-        opacity: 1, y: 0, duration: 0.9, ease: "power3.out",
+        opacity: 1, y: 0, duration: DURATION_BASE, ease: EASE_STANDARD,
         scrollTrigger: { trigger: el, start: "top 90%", once: true },
       }
     );
