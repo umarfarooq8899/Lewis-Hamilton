@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { EASE_STANDARD, EASE_SCRUB, DURATION_BASE } from "@/config/tokens";
 import { EraConfig } from "./types";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -121,12 +122,12 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
       if (index > 0) {
         tl.to(
           momentsRef.current[index - 1],
-          { opacity: 0, y: -30, duration: 3, ease: "power2.inOut" },
+          { opacity: 0, y: -30, duration: 3, ease: EASE_SCRUB },
           startTime - 1.5
         );
         tl.to(
           imagesRef.current[index - 1],
-          { opacity: 0, scale: 0.95, duration: 3, ease: "power2.inOut" },
+          { opacity: 0, scale: 0.95, duration: 3, ease: EASE_SCRUB },
           startTime - 1.5
         );
       }
@@ -135,18 +136,18 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
       if (index > 0) {
         tl.to(
           momentsRef.current[index],
-          { opacity: 1, y: 0, duration: 3.5, ease: "power2.out" },
+          { opacity: 1, y: 0, duration: 3.5, ease: EASE_SCRUB },
           startTime + 0.5
         );
         tl.to(
           imagesRef.current[index],
-          { opacity: 1, scale: 1, duration: 4, ease: "power2.out" },
+          { opacity: 1, scale: 1, duration: 4, ease: EASE_SCRUB },
           startTime
         );
       } else {
         tl.to(
           imagesRef.current[0],
-          { scale: 1, duration: 3, ease: "none" },
+          { scale: 1, duration: 3, ease: EASE_SCRUB },
           0
         );
       }
@@ -203,7 +204,7 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
 
         {/* LEFT COLUMN: Visual Media (Parallax Driver / Car Portrait) */}
         <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden z-10 flex items-center justify-center p-6 md:py-12 md:pl-28 md:pr-12 lg:pl-36 lg:pr-16">
-          <div className="relative w-full h-[90%] max-w-lg aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900/60 border border-white/5 shadow-2xl">
+          <div className="glass-card relative w-full h-[90%] max-w-lg aspect-[3/4]">
             {config.moments.map((moment, idx) => (
               <div
                 key={moment.id}
@@ -255,11 +256,11 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
         </div>
 
         {/* RIGHT COLUMN: Era Info & Moments */}
-        <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24">
+        <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 flex flex-col justify-center" style={{ paddingInline: 'var(--container-px)' }}>
           <div className="mb-6 md:mb-12">
             <span
-              className="font-mono text-xs md:text-sm tracking-widest uppercase opacity-40 transition-colors"
-              style={{ color: config.accentColor }}
+              className="font-mono tracking-widest uppercase transition-colors"
+              style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)', color: config.accentColor }}
             >
               {config.years}
             </span>
@@ -283,20 +284,18 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
                     <h3 className="font-display font-medium text-lg md:text-2xl text-neutral-200 leading-tight">
                       {moment.title}
                     </h3>
-                    <p className="font-mono text-[10px] md:text-xs tracking-wider uppercase opacity-40 mt-1">
+                    <p className="font-mono tracking-wider uppercase mt-1" style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)' }}>
                       {moment.subtitle}
                     </p>
                   </div>
 
-                  <p className="font-ui text-sm md:text-base text-neutral-400 leading-relaxed font-light">
+                  <p className="font-ui font-light" style={{ fontSize: 'var(--text-body)', lineHeight: '1.7', color: 'rgba(242, 237, 228, var(--text-secondary))' }}>
                     {moment.description}
                   </p>
 
                   <div
-                    className="flex items-center gap-4 mt-6 p-4 rounded-xl border border-white/5 bg-white/[0.02]"
-                    style={{
-                      borderLeft: `3px solid ${config.accentColor}`,
-                    }}
+                    className="glass-card flex items-center gap-4 mt-6"
+                    style={{ padding: 'var(--card-padding)', cursor: 'default', borderLeft: `3px solid ${config.accentColor}` }}
                   >
                     <span
                       ref={addToStatsRef}
@@ -305,10 +304,10 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
                       {moment.statNumber}
                     </span>
                     <div className="flex flex-col">
-                      <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-wider text-neutral-500">
+                      <span className="font-mono uppercase tracking-wider" style={{ fontSize: 'var(--text-eyebrow)', color: 'rgba(242, 237, 228, var(--text-tertiary))' }}>
                         Metric
                       </span>
-                      <span className="font-ui text-xs md:text-sm text-neutral-300 font-medium">
+                      <span className="font-ui font-medium" style={{ fontSize: 'var(--text-body)', color: 'rgba(242, 237, 228, var(--text-primary))' }}>
                         {moment.statLabel}
                       </span>
                     </div>
@@ -325,8 +324,8 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
         {/* Era header */}
         <div>
           <span
-            className="font-mono text-[11px] tracking-widest uppercase opacity-45"
-            style={{ color: config.accentColor }}
+            className="font-mono tracking-widest uppercase"
+            style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)', color: config.accentColor }}
           >
             {config.years}
           </span>
@@ -343,7 +342,7 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
               className="flex flex-col gap-4 border-b border-white/5 pb-8 last:border-0 last:pb-0"
             >
               {/* Media card */}
-              <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900/60 border border-white/5 shadow-lg">
+              <div className="glass-card relative w-full aspect-[4/3]">
                 <div
                   className="absolute inset-0 z-10 mix-blend-color pointer-events-none"
                   style={{
@@ -384,30 +383,28 @@ export default function EraSection({ config, onActiveEraChange }: Props) {
                   <h3 className="font-display font-medium text-lg text-neutral-200 leading-tight">
                     {moment.title}
                   </h3>
-                  <p className="font-mono text-[9px] tracking-wider uppercase opacity-45 mt-1">
+                  <p className="font-mono tracking-wider uppercase mt-1" style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)' }}>
                     {moment.subtitle}
                   </p>
                 </div>
 
-                <p className="font-ui text-sm text-neutral-400 leading-relaxed font-light">
+                <p className="font-ui font-light" style={{ fontSize: 'var(--text-body)', lineHeight: '1.7', color: 'rgba(242, 237, 228, var(--text-secondary))' }}>
                   {moment.description}
                 </p>
 
                 {/* Metric Badge */}
                 <div
-                  className="flex items-center gap-4 mt-3 p-4 rounded-xl border border-white/5 bg-white/[0.02]"
-                  style={{
-                    borderLeft: `3px solid ${config.accentColor}`,
-                  }}
+                  className="glass-card flex items-center gap-4 mt-3"
+                  style={{ padding: 'var(--card-padding)', cursor: 'default', borderLeft: `3px solid ${config.accentColor}` }}
                 >
                   <span className="font-display text-3xl font-black italic tracking-tighter text-neutral-100">
                     {moment.statNumber}
                   </span>
                   <div className="flex flex-col">
-                    <span className="font-mono text-[8px] uppercase tracking-wider text-neutral-500">
+                    <span className="font-mono uppercase tracking-wider" style={{ fontSize: 'var(--text-eyebrow)', color: 'rgba(242, 237, 228, var(--text-tertiary))' }}>
                       Metric
                     </span>
-                    <span className="font-ui text-xs text-neutral-300 font-medium">
+                    <span className="font-ui font-medium" style={{ fontSize: 'var(--text-body)', color: 'rgba(242, 237, 228, var(--text-primary))' }}>
                       {moment.statLabel}
                     </span>
                   </div>
