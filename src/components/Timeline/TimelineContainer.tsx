@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { erasConfig } from "./config";
+import { COLOR_GRAPHITE } from "@/config/tokens";
 import EraSection from "./EraSection";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -77,7 +78,7 @@ export default function TimelineContainer() {
       // Interpolate background to subtle era tint as it rolls into the viewport
       const tintTween = gsap.fromTo(
         container,
-        { backgroundColor: "#1C1B18" },
+        { backgroundColor: COLOR_GRAPHITE },
         {
           backgroundColor: era.bgTint,
           ease: "none",
@@ -95,7 +96,7 @@ export default function TimelineContainer() {
         container,
         { backgroundColor: era.bgTint },
         {
-          backgroundColor: "#1C1B18",
+          backgroundColor: COLOR_GRAPHITE,
           ease: "none",
           scrollTrigger: {
             trigger: section,
@@ -138,7 +139,7 @@ export default function TimelineContainer() {
       ref={containerRef}
       className="w-full relative transition-colors duration-300"
       style={{
-        backgroundColor: "#1C1B18",
+        backgroundColor: COLOR_GRAPHITE,
         // Smooth hardware-accelerated transitions
         willChange: "background-color",
       }}

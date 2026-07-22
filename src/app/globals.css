@@ -1,25 +1,107 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap");
-
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────
-   DESIGN TOKENS
-───────────────────────────────────────── */
+   DESIGN TOKENS — SINGLE SOURCE OF TRUTH
+   ───────────────────────────────────────── */
 :root {
-  /* Colour */
+  /* ── Colour ── */
   --color-graphite: #1C1B18;
   --color-offwhite: #F2EDE4;
   --color-accent: #7A4FFF;
   --color-accent-dim: rgba(122, 79, 255, 0.15);
 
-  /* Typography */
-  --font-display: "Fraunces", Georgia, serif;
-  --font-ui: "Space Grotesk", "IBM Plex Mono", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  /* ── Spacing ── */
+  --container-py: clamp(5rem, 10vw, 9rem);
+  --container-px: clamp(1.5rem, 5.5vw, 4rem);
+  --card-padding: clamp(1.25rem, 2.5vw, 2rem);
+  --gap-small: clamp(1rem, 2vw, 1.5rem);
+  --gap-large: clamp(2.5rem, 5vw, 4.5rem);
 
-  /* Spacing / easing */
+  /* ── Radius ── */
+  --radius-card: 16px;
+  --radius-tag: 6px;
+
+  /* ── Typography ── */
+  --text-section-title: clamp(2.8rem, 6vw, 5rem);
+  --text-stat-hero: clamp(4.5rem, 9vw, 9rem);
+  --text-stat-secondary: clamp(2.8rem, 5.5vw, 5.5rem);
+  --text-eyebrow: clamp(0.6rem, 0.8vw, 0.72rem);
+  --text-body: clamp(0.85rem, 1.1vw, 1rem);
+
+  /* ── Text Opacity Scale ── */
+  --text-primary: 0.75;
+  --text-secondary: 0.55;
+  --text-tertiary: 0.40;
+  --text-disabled: 0.25;
+
+  /* ── Border / Subtle-BG Opacity Scale ── */
+  --border-visible: 0.08;
+  --border-subtle: 0.05;
+  --border-idle: 0.03;
+
+  /* ── CSS Easing (for transitions) ── */
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+
+  /* ── Motion durations (CSS transitions) ── */
+  --duration-fast: 0.5s;
+  --duration-base: 0.85s;
+  --duration-slow: 1.2s;
+}
+
+/* ─────────────────────────────────────────
+   GLASS CARD — Reusable component class
+   ───────────────────────────────────────── */
+.glass-card {
+  position: relative;
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(242, 237, 228, 0.06);
+  background: rgba(242, 237, 228, 0.03);
+  overflow: hidden;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+  cursor: default;
+  will-change: transform, opacity;
+}
+
+.glass-card:hover {
+  border-color: rgba(122, 79, 255, 0.25);
+  box-shadow:
+    0 0 40px rgba(122, 79, 255, 0.15),
+    0 4px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Glass highlight rim — top specular edge, lights up on hover */
+.glass-card__highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 50%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-card:hover .glass-card__highlight {
+  opacity: 1;
+}
+
+/* Hero-tier variant — amplified glow/shadow, for the single largest stat */
+.glass-card--hero {
+  background: linear-gradient(145deg, rgba(122, 79, 255, 0.07) 0%, rgba(242, 237, 228, 0.02) 60%);
+  border-color: rgba(122, 79, 255, 0.15);
+}
+
+.glass-card--hero:hover {
+  box-shadow:
+    0 0 60px rgba(122, 79, 255, 0.15),
+    0 8px 48px rgba(0, 0, 0, 0.4);
 }
 
 /* ─────────────────────────────────────────
@@ -127,6 +209,21 @@ body::after {
   font-family: var(--font-mono);
 }
 
+/* Hero vignette overlay for mobile and desktop */
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(28, 27, 24, 0.45) 0%, rgba(28, 27, 24, 0.8) 70%, rgba(28, 27, 24, 0.95) 100%);
+}
+
+@media (min-width: 768px) {
+  .hero-vignette {
+    background: linear-gradient(to right, transparent 20%, rgba(28, 27, 24, 0.55) 55%, rgba(28, 27, 24, 0.88) 80%, rgba(28, 27, 24, 0.97) 100%);
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════
    LIVING STATS DASHBOARD
    Neutral graphite home-base — no era colour tint.
@@ -138,7 +235,7 @@ body::after {
   position: relative;
   width: 100%;
   background-color: var(--color-graphite);
-  padding: clamp(5rem, 10vw, 9rem) 0 clamp(4rem, 8vw, 7rem);
+  padding: var(--container-py) 0 calc(var(--container-py) * 0.8);
   overflow: hidden;
 }
 
@@ -175,7 +272,7 @@ body::after {
   width: 100%;
   max-width: 1280px;
   margin-inline: auto;
-  padding-inline: clamp(1.25rem, 5vw, 4rem);
+  padding-inline: var(--container-px);
 }
 
 /* ── Section header ── */
@@ -188,7 +285,7 @@ body::after {
 
 .stats-section-eyebrow {
   font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+  font-size: var(--text-eyebrow);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(122, 79, 255, 0.7);
@@ -198,7 +295,7 @@ body::after {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 800;
-  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-size: var(--text-section-title);
   color: var(--color-offwhite);
   line-height: 1;
   letter-spacing: -0.01em;
@@ -206,8 +303,8 @@ body::after {
 
 .stats-section-sub {
   font-family: var(--font-ui);
-  font-size: clamp(0.78rem, 1.1vw, 0.9rem);
-  color: rgba(242, 237, 228, 0.4);
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   max-width: 52ch;
   line-height: 1.6;
   margin-top: 0.4rem;
@@ -242,41 +339,7 @@ body::after {
   }
 }
 
-/* ── CARD BASE ── */
-.stats-card {
-  position: relative;
-  border-radius: 16px;
-  border: 1px solid rgba(242, 237, 228, 0.06);
-  background: rgba(242, 237, 228, 0.03);
-  overflow: hidden;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-  cursor: default;
-  will-change: transform, opacity;
-}
 
-.stats-card:hover {
-  border-color: rgba(122, 79, 255, 0.25);
-  box-shadow: 0 0 40px rgba(122, 79, 255, 0.08), 0 4px 32px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
-}
-
-/* Glass highlight rim — top specular edge, lights up on hover */
-.stats-card__glass {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0) 50%);
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.stats-card:hover .stats-card__glass {
-  opacity: 1;
-}
 
 /* Inner content padding — scales by card size */
 .stats-card__inner {
@@ -302,12 +365,6 @@ body::after {
 /* Hero — career wins */
 .stats-card--hero {
   min-height: clamp(200px, 22vw, 320px);
-  background: linear-gradient(145deg, rgba(122, 79, 255, 0.07) 0%, rgba(242, 237, 228, 0.02) 60%);
-  border-color: rgba(122, 79, 255, 0.15);
-}
-
-.stats-card--hero:hover {
-  box-shadow: 0 0 60px rgba(122, 79, 255, 0.12), 0 8px 48px rgba(0, 0, 0, 0.5);
 }
 
 /* Large — championships */
@@ -426,7 +483,7 @@ body::after {
   font-size: clamp(0.6rem, 0.85vw, 0.75rem);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(242, 237, 228, 0.35);
+  color: rgba(242, 237, 228, 0.5);
 }
 
 .stats-label--small {
@@ -437,7 +494,7 @@ body::after {
 .stats-sublabel {
   font-family: var(--font-ui);
   font-size: clamp(0.65rem, 0.9vw, 0.78rem);
-  color: rgba(242, 237, 228, 0.3);
+  color: rgba(242, 237, 228, 0.48);
   line-height: 1.4;
   margin-top: 0.15rem;
 }
@@ -614,8 +671,8 @@ body::after {
 .legacy-section {
   position: relative;
   width: 100%;
-  background-color: #181714;
-  padding: clamp(5rem, 10vw, 9rem) 0 clamp(4rem, 8vw, 7rem);
+  background-color: var(--color-graphite);
+  padding: var(--container-py) 0 calc(var(--container-py) * 0.8);
   overflow: hidden;
 }
 
@@ -648,7 +705,7 @@ body::after {
   width: 100%;
   max-width: 900px;
   margin-inline: auto;
-  padding-inline: clamp(1.5rem, 6vw, 4rem);
+  padding-inline: var(--container-px);
 }
 
 /* ── Section header ── */
@@ -659,10 +716,10 @@ body::after {
 .legacy-section-eyebrow {
   display: block;
   font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.75vw, 0.68rem);
-  letter-spacing: 0.22em;
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(122, 79, 255, 0.5);
+  color: rgba(122, 79, 255, 0.7);
   margin-bottom: 0.75rem;
 }
 
@@ -670,7 +727,7 @@ body::after {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 800;
-  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-size: var(--text-section-title);
   color: var(--color-offwhite);
   line-height: 0.95;
   letter-spacing: -0.02em;
@@ -679,8 +736,8 @@ body::after {
 
 .legacy-section-sub {
   font-family: var(--font-ui);
-  font-size: clamp(0.8rem, 1.1vw, 0.92rem);
-  color: rgba(242, 237, 228, 0.35);
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   max-width: 58ch;
   line-height: 1.65;
 }
@@ -699,14 +756,14 @@ body::after {
 .legacy-cards-stack {
   display: flex;
   flex-direction: column;
-  gap: clamp(2.5rem, 5vw, 4.5rem);
+  gap: var(--gap-large);
 }
 
 .legacy-card {
   position: relative;
   display: grid;
   grid-template-columns: 3px 1fr;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
+  gap: var(--gap-large);
   will-change: opacity, transform;
 }
 
@@ -733,7 +790,7 @@ body::after {
 
 .legacy-eyebrow {
   font-family: var(--font-mono);
-  font-size: clamp(0.52rem, 0.72vw, 0.63rem);
+  font-size: var(--text-eyebrow);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(122, 79, 255, 0.65);
@@ -755,7 +812,7 @@ body::after {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 700;
-  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  font-size: var(--text-stat-secondary);
   color: var(--color-offwhite);
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -775,8 +832,8 @@ body::after {
 
 .legacy-body {
   font-family: var(--font-ui);
-  font-size: clamp(0.85rem, 1.15vw, 1rem);
-  color: rgba(242, 237, 228, 0.5);
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   line-height: 1.75;
   max-width: 68ch;
 }
@@ -818,7 +875,7 @@ body::after {
   position: relative;
   width: 100%;
   background-color: var(--color-graphite);
-  padding: clamp(5rem, 10vw, 9rem) 0 clamp(5rem, 10vw, 9rem);
+  padding: var(--container-py) 0 var(--container-py);
   overflow: hidden;
 }
 
@@ -857,7 +914,7 @@ body::after {
   width: 100%;
   max-width: 1280px;
   margin-inline: auto;
-  padding-inline: clamp(1.5rem, 5vw, 4rem);
+  padding-inline: var(--container-px);
 }
 
 .offtrack-section-header {
@@ -867,10 +924,10 @@ body::after {
 .offtrack-section-eyebrow {
   display: block;
   font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.75vw, 0.68rem);
-  letter-spacing: 0.22em;
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(180, 110, 255, 0.6);
+  color: rgba(180, 110, 255, 0.7);
   margin-bottom: 0.75rem;
 }
 
@@ -878,7 +935,7 @@ body::after {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 800;
-  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-size: var(--text-section-title);
   color: var(--color-offwhite);
   line-height: 0.95;
   letter-spacing: -0.02em;
@@ -887,8 +944,8 @@ body::after {
 
 .offtrack-section-sub {
   font-family: var(--font-ui);
-  font-size: clamp(0.8rem, 1.1vw, 0.92rem);
-  color: rgba(242, 237, 228, 0.35);
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   max-width: 52ch;
   line-height: 1.65;
 }
@@ -935,29 +992,6 @@ body::after {
   .offtrack-grid {
     grid-template-columns: 1fr;
   }
-}
-
-/* ── Off-track card ── */
-.offtrack-card {
-  position: relative;
-  border-radius: 14px;
-  border: 1px solid rgba(242, 237, 228, 0.05);
-  background: rgba(242, 237, 228, 0.02);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  will-change: opacity, transform;
-}
-
-.offtrack-card:hover {
-  border-color: rgba(180, 110, 255, 0.18);
-  box-shadow: 0 4px 36px rgba(0, 0, 0, 0.35), 0 0 40px rgba(160, 90, 255, 0.05);
-}
-
-.offtrack-card--wide {
-  background: linear-gradient(165deg, rgba(180, 110, 255, 0.04) 0%, rgba(242, 237, 228, 0.02) 60%);
-  border-color: rgba(180, 110, 255, 0.08);
 }
 
 /* ── Image placeholder ── */
@@ -1026,29 +1060,6 @@ body::after {
   backdrop-filter: blur(6px);
 }
 
-.offtrack-cat--fashion {
-  color: rgba(255, 195, 120, 0.85);
-  background: rgba(255, 180, 80, 0.1);
-  border: 1px solid rgba(255, 180, 80, 0.18);
-}
-
-.offtrack-cat--music {
-  color: rgba(160, 200, 255, 0.85);
-  background: rgba(100, 160, 255, 0.08);
-  border: 1px solid rgba(100, 160, 255, 0.15);
-}
-
-.offtrack-cat--brand {
-  color: rgba(160, 255, 180, 0.75);
-  background: rgba(100, 220, 130, 0.07);
-  border: 1px solid rgba(100, 220, 130, 0.14);
-}
-
-.offtrack-cat--culture {
-  color: rgba(200, 160, 255, 0.8);
-  background: rgba(160, 100, 255, 0.08);
-  border: 1px solid rgba(160, 100, 255, 0.15);
-}
 
 .offtrack-headline {
   font-family: var(--font-display);
@@ -1110,7 +1121,7 @@ body::after {
 .offtrack-section-sub {
   font-family: var(--font-ui);
   font-size: clamp(0.8rem, 1.1vw, 0.92rem);
-  color: rgba(242, 237, 228, 0.35);
+  color: rgba(242, 237, 228, 0.5);
   max-width: 52ch;
   line-height: 1.65;
 }
@@ -1290,7 +1301,7 @@ body::after {
 .offtrack-body {
   font-family: var(--font-ui);
   font-size: clamp(0.78rem, 1.05vw, 0.9rem);
-  color: rgba(242, 237, 228, 0.45);
+  color: rgba(242, 237, 228, 0.55);
   line-height: 1.7;
 }
 
@@ -1332,7 +1343,7 @@ body::after {
   position: relative;
   width: 100%;
   background-color: var(--color-graphite);
-  padding: clamp(6rem, 12vw, 10rem) 0 clamp(4rem, 8vw, 6rem);
+  padding: var(--container-py) 0 calc(var(--container-py) * 0.6);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1393,7 +1404,7 @@ body::after {
 .footer-quote {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+  font-size: var(--text-stat-primary);
   color: rgba(242, 237, 228, 0.75);
   line-height: 1.5;
   margin-bottom: 1rem;
@@ -1401,17 +1412,17 @@ body::after {
 
 .footer-quote-author {
   font-family: var(--font-mono);
-  font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+  font-size: var(--text-eyebrow);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(242, 237, 228, 0.4);
+  color: rgba(242, 237, 228, var(--text-tertiary));
 }
 
 .footer-credits-wrap {
   width: 100%;
   max-width: 1280px;
   margin-inline: auto;
-  padding-inline: clamp(1.5rem, 5vw, 4rem);
+  padding-inline: var(--container-px);
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr;
   gap: 3rem;
@@ -1427,9 +1438,8 @@ body::after {
 
 .footer-disclaimer {
   font-family: var(--font-ui);
-  font-size: clamp(0.72rem, 0.95vw, 0.85rem);
-  color: rgba(242, 237, 228, 0.45);
-  /* optimized contrast */
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   line-height: 1.6;
 }
 
@@ -1442,18 +1452,17 @@ body::after {
 
 .footer-section-title {
   font-family: var(--font-mono);
-  font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+  font-size: var(--text-eyebrow);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(242, 237, 228, 0.6);
-  /* optimized contrast */
+  color: rgba(242, 237, 228, var(--text-secondary));
   margin-bottom: 0.25rem;
 }
 
 .footer-link-item {
   font-family: var(--font-ui);
-  font-size: clamp(0.75rem, 1vw, 0.9rem);
-  color: rgba(242, 237, 228, 0.45);
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   text-decoration: none;
   transition: color 0.3s ease;
   display: flex;
@@ -1482,9 +1491,8 @@ body::after {
 
 .footer-meta-item {
   font-family: var(--font-mono);
-  font-size: clamp(0.68rem, 0.9vw, 0.8rem);
-  color: rgba(242, 237, 228, 0.35);
-  /* optimized contrast */
+  font-size: var(--text-body);
+  color: rgba(242, 237, 228, var(--text-secondary));
   line-height: 1.5;
 }
 

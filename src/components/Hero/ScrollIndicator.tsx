@@ -25,10 +25,10 @@ const ScrollIndicator = forwardRef<HTMLDivElement>(function ScrollIndicator(_, r
       <span
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "0.55rem",
+          fontSize: "var(--text-eyebrow)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "rgba(242,237,228,0.3)",
+          color: "rgba(242, 237, 228, var(--text-tertiary))",
           writingMode: "horizontal-tb",
         }}
       >
@@ -42,7 +42,7 @@ const ScrollIndicator = forwardRef<HTMLDivElement>(function ScrollIndicator(_, r
           height: "60px",
           position: "relative",
           overflow: "hidden",
-          background: "rgba(242,237,228,0.12)",
+          background: "rgba(242, 237, 228, var(--border-visible))",
           borderRadius: "1px",
         }}
       >

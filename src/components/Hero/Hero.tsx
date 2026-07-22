@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
+import { EASE_STANDARD, DURATION_FAST, DURATION_SLOW, DURATION_COUNT } from "@/config/tokens";
 import HelmetVisor from "./HelmetVisor";
 import HeroComposition, { type HeroCompositionRef } from "./HeroComposition";
 import HeroText, { type HeroTextHandle } from "./HeroText";
@@ -82,8 +83,11 @@ export default function Hero() {
       return;
     }
 
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    startRAFLoop(); // Start immediately so visor highlight is live from Phase 1
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      window.addEventListener("mousemove", onMouseMove, { passive: true });
+      startRAFLoop(); // Start immediately so visor highlight is live from Phase 1
+    }
 
     // ── Stat count-up object ──
     const counter = { val: 0 };
@@ -92,82 +96,82 @@ export default function Hero() {
     };
 
     // ── Master GSAP Timeline ──
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    const tl = gsap.timeline({ defaults: { ease: EASE_STANDARD } });
 
     // PHASE 1: Visor fades in (0 – 1.5s)
     tl.to(visor, {
       opacity: 1,
-      duration: 1.2,
+      duration: DURATION_SLOW,
       ease: "power2.inOut",
     }, 0);
 
     // PHASE 2: Pull-back scale (1.5 – 2.5s)
     tl.to(visor, {
       scale: 0.72,
-      duration: 1.0,
+      duration: DURATION_SLOW,
       ease: "power2.inOut",
     }, 1.5);
 
     // PHASE 3a: Visor fades out (2.5 – 3.5s)
     tl.to(visor, {
       opacity: 0,
-      duration: 1.0,
+      duration: DURATION_SLOW,
       ease: "power2.inOut",
     }, 2.5);
 
     // PHASE 3b: Composition crossfades in (2.5 – 4.0s)
     tl.to(compWrap, {
       opacity: 1,
-      duration: 1.5,
+      duration: DURATION_SLOW,
       ease: "power2.inOut",
     }, 2.5);
 
     // PHASE 4a: Divider line
     tl.fromTo(divider,
       { opacity: 0, scaleX: 0, transformOrigin: "right" },
-      { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" },
+      { opacity: 1, scaleX: 1, duration: DURATION_FAST, ease: EASE_STANDARD },
       4.0
     );
 
     // PHASE 4a: Label fades up
     tl.fromTo(label,
       { opacity: 0, y: 8 },
-      { opacity: 1, y: 0, duration: 0.5 },
+      { opacity: 1, y: 0, duration: DURATION_FAST },
       4.2
     );
 
     // PHASE 4a: Name slides up
     tl.fromTo(name,
       { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.65 },
+      { opacity: 1, y: 0, duration: DURATION_FAST },
       4.35
     );
 
     // PHASE 4b: Stat fade/slide in
     tl.fromTo(stat,
       { opacity: 0, y: 18 },
-      { opacity: 1, y: 0, duration: 0.7 },
+      { opacity: 1, y: 0, duration: DURATION_FAST },
       4.3
     );
 
     // PHASE 4b: Count-up 0 → 105
     tl.to(counter, {
       val: 105,
-      duration: 1.1,
-      ease: "power2.out",
+      duration: DURATION_COUNT,
+      ease: EASE_STANDARD,
       onUpdate: updateCounter,
     }, 4.3);
 
     // Reveal "career wins" sub-label
     tl.to(section.querySelector("[data-stat-label]"), {
       opacity: 1,
-      duration: 0.5,
+      duration: DURATION_FAST,
     }, 4.5);
 
     // PHASE 5: Scroll indicator
     tl.fromTo(indicator,
       { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.7 },
+      { opacity: 1, y: 0, duration: DURATION_FAST },
       5.3
     );
 

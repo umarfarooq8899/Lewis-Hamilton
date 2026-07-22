@@ -29,19 +29,21 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
       {/* Thin horizontal rule above name */}
       <div
         ref={dividerRef}
-        className="w-10 h-[1px] bg-white/30 self-center md:self-end"
+        className="w-10 h-[1px] self-center md:self-end"
         style={{
           opacity: 0,
           willChange: "opacity, transform",
+          background: "rgba(242, 237, 228, var(--text-tertiary))",
         }}
       />
 
       {/* Label line */}
       <span
         ref={labelRef}
-        className="font-mono tracking-[0.22em] uppercase text-white/45 text-center md:text-right"
+        className="font-mono tracking-[0.2em] uppercase text-center md:text-right"
         style={{
-          fontSize: "clamp(0.55rem, 0.8vw, 0.75rem)",
+          fontSize: "var(--text-eyebrow)",
+          color: "rgba(242, 237, 228, var(--text-secondary))",
           opacity: 0,
           willChange: "opacity, transform",
         }}
@@ -79,11 +81,12 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
           0
         </span>
         <span
-          className="font-mono tracking-[0.18em] uppercase text-white/35 text-center md:text-right"
+          className="font-mono tracking-[0.2em] uppercase text-center md:text-right"
           style={{
-            fontSize: "clamp(0.5rem, 0.7vw, 0.65rem)",
+            fontSize: "var(--text-eyebrow)",
+            color: "rgba(242, 237, 228, var(--text-tertiary))",
             opacity: 0,
-            transition: "opacity 0.6s ease",
+            transition: "opacity var(--duration-fast) ease",
           }}
           data-stat-label
         >
