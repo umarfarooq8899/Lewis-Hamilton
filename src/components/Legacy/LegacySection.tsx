@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { legacyItems, offTrackItems, type LegacyItem, type OffTrackItem } from "./legacyConfig";
+import { EASE_STANDARD, DURATION_BASE, CATEGORY_COLORS } from "@/config/tokens";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,9 +22,9 @@ function useFadeIn(
     gsap.set(el, { opacity: 0, y, x });
     gsap.to(el, {
       opacity: 1, y: 0, x: 0,
-      duration: 0.85,
+      duration: DURATION_BASE,
       delay,
-      ease: "power3.out",
+      ease: EASE_STANDARD,
       scrollTrigger: { trigger: el, start: "top 88%", once: true },
     });
     return () => ScrollTrigger.getAll().forEach(t => t.trigger === el && t.kill());
@@ -106,21 +108,25 @@ function OffTrackCard({
     y: index % 2 === 0 ? 32 : 20,
   });
 
-  const categoryColors: Record<OffTrackItem["category"], string> = {
-    Fashion: "offtrack-cat--fashion",
-    Music:   "offtrack-cat--music",
-    Brand:   "offtrack-cat--brand",
-    Culture: "offtrack-cat--culture",
-  };
+  const categoryStyle = CATEGORY_COLORS[item.category.toLowerCase() as keyof typeof CATEGORY_COLORS] || CATEGORY_COLORS.culture;
 
   return (
     <div
       ref={ref}
-      className={`offtrack-card ${isLarge ? "offtrack-card--wide" : ""}`}
+      className={`glass-card offtrack-card ${isLarge ? "glass-card--hero offtrack-card--wide" : ""}`}
       style={{ opacity: 0 }}
     >
+      <div className="glass-card__highlight" />
+
       {/* Colour-coded category tag */}
-      <span className={`offtrack-category-tag ${categoryColors[item.category]}`}>
+      <span
+        className="offtrack-category-tag"
+        style={{
+          color: categoryStyle.text,
+          backgroundColor: categoryStyle.bg,
+          borderColor: categoryStyle.border,
+        }}
+      >
         {item.category}
       </span>
 
@@ -134,12 +140,28 @@ function OffTrackCard({
       )}
 
       {item.imageSrc && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.imageSrc}
-          alt={item.imageAlt ?? item.headline}
-          className={`offtrack-image offtrack-image--${item.imageAspect ?? "landscape"}`}
-        />
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio:
+              item.imageAspect === "portrait"
+                ? "3/4"
+                : item.imageAspect === "square"
+                ? "1/1"
+                : "16/9",
+          }}
+        >
+          <Image
+            src={item.imageSrc}
+            alt={item.imageAlt ?? item.headline}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="offtrack-image"
+            style={{ objectFit: "cover" }}
+            loading="lazy"
+          />
+        </div>
       )}
 
       <div className="offtrack-card__body">
