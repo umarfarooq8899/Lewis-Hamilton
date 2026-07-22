@@ -161,16 +161,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
         </div>
 
         {/* Vignette & right-side fade to create negative space for text */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(to right, transparent 20%, rgba(28,27,24,0.55) 55%, rgba(28,27,24,0.88) 80%, rgba(28,27,24,0.97) 100%)",
-            zIndex: 2,
-            pointerEvents: "none",
-          }}
-        />
+        <div className="hero-vignette" />
         {/* Bottom bleed fade */}
         <div
           style={{
