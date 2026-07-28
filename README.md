@@ -1,87 +1,113 @@
-# Lewis Hamilton Tribute Website — Hero Section
+# Sir Lewis Hamilton — Living Digital Tribute
 
-This is a Next.js (App Router) scroll-driven tribute website for Lewis Hamilton. Currently, only the **Hero Section** has been implemented and polished to establish the visual and motion identity.
+A high-performance, scroll-driven interactive web experience built to celebrate the career, milestones, and legacy of **Sir Lewis Hamilton**.
+
+Designed with cinematic editorial aesthetics, smooth scroll-linked physics, and GPU-accelerated motion engineering.
+
+---
+
+## Key Features
+
+- **Hero Experience**: 5-phase master animation sequence featuring interactive helmet visor lighting, custom parallax depth composition, and real-time cursor tracking without React re-renders.
+- **Interactive Career Timeline**: Multi-era journey covering key career inflection points from his 2007 McLaren debut through his historic Mercedes dominance, 2024 Silverstone victory, and 2025 Ferrari transition. Includes scroll-pinned presentation and desktop background tint interpolation.
+- **Living Stats Dashboard**: Animated count-up counters and narrative cards displaying verified career metrics (104 Wins, 7 World Championships, 104 Poles, 201 Podiums, 4,829+ Points).
+- **Legacy & Off-Track Section**: Highlighting Hamilton's impact beyond motorsport — including the Hamilton Commission, Mission 44, civil rights advocacy, fashion, music (XNDA), and venture investments.
+- **Accessibility & Contrast**: Built with strict WCAG AA contrast standards, dark mode graphite color palettes, and responsive layouts across all device viewports.
+
+---
 
 ## Tech Stack & Architecture
-- **Framework**: Next.js 16 (App Router)
-- **Styling**: Tailwind CSS v4
-- **Smooth Scroll**: Lenis (configured globally in `SmoothScroll.tsx`, integrated with the GSAP ticker)
-- **Animation**: GSAP (GreenSock Animation Platform) for timeline coordination
-- **Performance**: Layer drift and opacity shifts are run exclusively on GPU-accelerated attributes (`transform` & `opacity`) with zero React re-renders during mouse interactions.
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router & Turbopack)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla CSS Design Tokens
+- **Animation**: [GSAP](https://greensock.com/gsap/) (GreenSock Animation Platform) + `ScrollTrigger`
+- **Smooth Scroll**: [Lenis](https://lenis.darkroom.engineering/) smooth scrolling integrated directly with the GSAP animation ticker
+- **Performance Architecture**: High-frequency mouse interactions operate directly on DOM element refs via a single `requestAnimationFrame` loop, bypassing the React render pipeline for 60fps responsiveness.
+
+---
+
+## Project Structure
+
+```
+d:\projects\Lewis-Hamilton\
+├── public/                # Static assets (moments, hero images, fonts)
+├── src/
+│   ├── app/
+│   │   ├── globals.css    # Central CSS design tokens & glassmorphism utilities
+│   │   ├── layout.tsx     # Root layout & Google Fonts integration
+│   │   └── page.tsx       # Main page assembling sections
+│   ├── components/
+│   │   ├── Hero/          # Hero visor, parallax composition, text overlay
+│   │   ├── Timeline/      # Scroll-pinned era sections & spine HUD
+│   │   ├── Stats/         # Animated count-up dashboard & narrative cards
+│   │   ├── Legacy/        # Beyond the Car & Off-Track grid
+│   │   └── Footer/        # Footer quotes, disclaimer, & scroll progress motif
+│   └── config/
+│       ├── tokens.ts      # Design tokens for GSAP & JS consumption
+│       └── imageConfig.ts # Central image manifest & low-res fallback metadata
+├── package.json
+└── tsconfig.json
+```
 
 ---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/umarfarooq8899/Lewis-Hamilton.git
+   cd Lewis-Hamilton
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. **View in browser**: Open [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Production Build
+
+To build the application for production deployment:
 
 ```bash
-npm run dev
+npm run build
+npm run start
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ---
 
 ## Production Asset Swap Guide
 
-Below is the inventory of placeholder assets currently used in the codebase and instructions on how to swap them for final production assets:
+The project utilizes a modular image manifest in [`src/config/imageConfig.ts`](file:///d:/projects/Lewis-Hamilton/src/config/imageConfig.ts).
 
-### 1. Helmet Visor Animation (Phase 1 & 2)
-- **Current Stand-in**: CSS radial-gradient blob with simulated pointer-tracked glare effect inside [HelmetVisor.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HelmetVisor.tsx).
-- **Target Asset**: A Rive animation file (`helmet_visor.riv`).
-- **How to Swap**:
-  1. Place the `.riv` asset inside the `/public` folder.
-  2. Install `@rive-app/react-canvas` (already in `package.json`).
-  3. Replace the placeholder structure in [HelmetVisor.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HelmetVisor.tsx) with:
-     ```tsx
-     import { useRive, useStateMachineInput } from '@rive-app/react-canvas';
+### 1. Helmet Visor Animation (`/public/helmet_visor.riv`)
+- **Current Setup**: CSS radial-gradient visor silhouette in [`HelmetVisor.tsx`](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HelmetVisor.tsx).
+- **Rive Swap**:
+  1. Add your Rive file (`helmet_visor.riv`) to `/public`.
+  2. Use `@rive-app/react-canvas` in [`HelmetVisor.tsx`](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HelmetVisor.tsx).
+  3. Bind normalized mouse coordinates `mouseX` / `mouseY` (0–1 range) to the Rive state machine.
 
-     // inside the component:
-     const { rive, RiveComponent } = useRive({
-       src: '/helmet_visor.riv',
-       stateMachines: 'State Machine 1',
-       autoplay: true,
-     });
-     ```
-  4. Track mouse movement coordinates normalized (0 to 1) and feed them to the Rive input controls (e.g., `mouseX` and `mouseY` inputs) on the state machine inside [Hero.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Hero/Hero.tsx).
+### 2. Custom Photography & Hero Images
+- High-resolution moment photography can be updated directly inside [`src/components/Timeline/config.ts`](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/config.ts) and [`src/config/imageConfig.ts`](file:///d:/projects/Lewis-Hamilton/src/config/imageConfig.ts).
 
-### 2. Driver Portrait Parallax (Phase 3)
-- **Current Stand-in**: `https://picsum.photos/seed/hamilton/900/1200` loaded with Next.js dynamic image loader, treated with CSS duotone gradients.
-- **Target Assets**: Three separate layered image assets to produce a realistic 3D parallax depth:
-  - **Background Layer**: Blur/abstract environment (e.g., race track bokeh, team garage lights).
-  - **Midground Layer**: Secondary elements (e.g., car silhouette, halo structure).
-  - **Foreground Layer**: Main high-contrast portrait of Lewis Hamilton (cut out/isolated, weighted on the left-third).
-- **How to Swap**:
-  1. Save images as `/public/hero-bg.png`, `/public/hero-mid.png`, and `/public/hero-fg.png` (using transparent PNGs for foreground/midground).
-  2. Open [HeroComposition.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HeroComposition.tsx).
-  3. Replace `PLACEHOLDER_IMG` references with their respective paths:
-     - Foreground `Image` -> `/hero-fg.png`
-     - Midground `Image` -> `/hero-mid.png`
-     - Background `Image` -> `/hero-bg.png`
-  4. Adjust scale, crop alignments, or blur strengths directly via CSS custom variables/styles in [HeroComposition.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HeroComposition.tsx).
+---
 
-### 3. Display Font (Serif)
-- **Current Stand-in**: `Fraunces` via `next/font/google`.
-- **Target Asset**: Editorial high-contrast serif font (e.g., custom web font or licensed serif).
-- **How to Swap**:
-  - Update imports and configuration in [layout.tsx](file:///d:/projects/Lewis-Hamilton/src/app/layout.tsx) and the CSS custom variable `--font-display` in [globals.css](file:///d:/projects/Lewis-Hamilton/src/app/globals.css).
+## Disclaimer
 
-### 4. UI/Data Font (Grotesk/Mono)
-- **Current Stand-in**: `Space Grotesk` and `IBM Plex Mono` via `next/font/google`.
-- **Target Asset**: Clean grotesque/neo-grotesque font (e.g., Neue Montreal).
-- **How to Swap**:
-  - Update imports and configuration in [layout.tsx](file:///d:/projects/Lewis-Hamilton/src/app/layout.tsx) and the CSS custom variables `--font-ui` and `--font-mono` in [globals.css](file:///d:/projects/Lewis-Hamilton/src/app/globals.css).
-
-### 5. Era Timeline Media & Images
-- **Current Stand-ins**: Auto-generated `https://picsum.photos/seed/[imageSeed]/800/1000` inside [EraSection.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/EraSection.tsx).
-- **Target Assets**: High-resolution editorial photography matching each historical milestone:
-  - **McLaren (2007–2009)**: Rookie debut, 2008 rain-soaked Silverstone, and 2008 Interlagos final corner decider.
-  - **Mercedes (2014–2020)**: 2014 Abu Dhabi championship podium, 2020 wet Istanbul 7th title clinch.
-  - **Abu Dhabi 2021**: Muted/heavy visual of Lewis Hamilton at the 2021 season finale.
-  - **The Drought (2022–2024)**: Mercedes W13/W14 struggles (porpoising), 2024 Silverstone emotional redemption.
-  - **Ferrari (2025–Current)**: Scuderia Ferrari transition media (Maranello red).
-- **How to Swap**:
-  - Store the assets inside `/public/timeline/` (e.g., `/public/timeline/2008-silverstone.jpg`).
-  - Open [config.ts](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/config.ts) and modify each moment's `imageSeed` reference to point to the local file, or adjust [EraSection.tsx](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/EraSection.tsx) to read direct image paths from the config object.
-
+This is a non-commercial fan tribute project created for educational and design demonstration purposes. It is not affiliated with, authorized, or endorsed by Sir Lewis Hamilton, his representatives, or Formula 1.
