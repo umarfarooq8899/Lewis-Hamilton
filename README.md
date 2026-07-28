@@ -96,14 +96,7 @@ npm run start
 
 The project utilizes a modular image manifest in [`src/config/imageConfig.ts`](file:///d:/projects/Lewis-Hamilton/src/config/imageConfig.ts).
 
-### 1. Helmet Visor Animation (`/public/helmet_visor.riv`)
-- **Current Setup**: CSS radial-gradient visor silhouette in [`HelmetVisor.tsx`](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HelmetVisor.tsx).
-- **Rive Swap**:
-  1. Add your Rive file (`helmet_visor.riv`) to `/public`.
-  2. Use `@rive-app/react-canvas` in [`HelmetVisor.tsx`](file:///d:/projects/Lewis-Hamilton/src/components/Hero/HelmetVisor.tsx).
-  3. Bind normalized mouse coordinates `mouseX` / `mouseY` (0–1 range) to the Rive state machine.
-
-### 2. Custom Photography & Hero Images
+### 1. Custom Photography & Hero Images
 - High-resolution moment photography can be updated directly inside [`src/components/Timeline/config.ts`](file:///d:/projects/Lewis-Hamilton/src/components/Timeline/config.ts) and [`src/config/imageConfig.ts`](file:///d:/projects/Lewis-Hamilton/src/config/imageConfig.ts).
 
 ---

@@ -1,28 +1,118 @@
 "use client";
 
-import { forwardRef } from "react";
-
-// ─────────────────────────────────────────
-// PLACEHOLDER: This component will be replaced with a Rive animation
-// loading the file: /public/helmet_visor.riv
-// The Rive canvas should fill the same container div and expose a
-// StateMachine input "mouseX" and "mouseY" (0–1 range).
-//
-// When swapping in Rive:
-//   1. Remove this entire component
-//   2. Add <RiveComponent /> inside the same outer div
-//   3. Pass normalised mouseX/mouseY to the Rive state machine inputs
-// ─────────────────────────────────────────
+import { forwardRef, useEffect, useRef } from "react";
 
 interface Props {
-  /** Forwarded ref to the inner highlight overlay — parent drives it via direct style mutation in the RAF loop */
-  highlightRef: React.RefObject<HTMLDivElement | null>;
+  /** Optional forwarded ref for backwards compatibility */
+  highlightRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const HelmetVisor = forwardRef<HTMLDivElement, Props>(function HelmetVisor(
-  { highlightRef },
+  _props,
   ref
 ) {
+  const visorContainerRef = useRef<HTMLDivElement>(null);
+  const reflectionRef = useRef<HTMLDivElement>(null);
+  const secondaryReflectionRef = useRef<HTMLDivElement>(null);
+
+  // Animation & position tracking refs (raw refs = 0 React re-renders)
+  const targetPos = useRef({ x: 0.5, y: 0.5 });
+  const currentPos = useRef({ x: 0.5, y: 0.5 });
+  const isTouchDevice = useRef(false);
+  const hasActiveMouse = useRef(false);
+  const rafId = useRef<number | null>(null);
+  const ambientTime = useRef(0);
+
+  useEffect(() => {
+    // Detect touch / coarse pointer devices
+    const touchQuery = window.matchMedia("(pointer: coarse)");
+    isTouchDevice.current = touchQuery.matches || "ontouchstart" in window;
+
+    // Scope mouse tracking listener to the hero section container
+    const visorEl = visorContainerRef.current;
+    const heroSection = visorEl?.closest("section") || window;
+
+    const handleMouseMove = (e: Event) => {
+      const mouseEvt = e as MouseEvent;
+      if (isTouchDevice.current || !visorContainerRef.current) return;
+      hasActiveMouse.current = true;
+
+      const rect = visorContainerRef.current.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      // 0–1 range relative to visor container's bounding box
+      const rawX = (mouseEvt.clientX - rect.left) / rect.width;
+      const rawY = (mouseEvt.clientY - rect.top) / rect.height;
+
+      // Allow soft extension past borders (-0.1 to 1.1) for fluid movement near edges
+      targetPos.current.x = Math.max(-0.1, Math.min(1.1, rawX));
+      targetPos.current.y = Math.max(-0.1, Math.min(1.1, rawY));
+    };
+
+    heroSection.addEventListener("mousemove", handleMouseMove, {
+      passive: true,
+    });
+
+    // Handle touch device state changes dynamically
+    const handleTouchChange = (evt: MediaQueryListEvent) => {
+      isTouchDevice.current = evt.matches;
+    };
+    touchQuery.addEventListener("change", handleTouchChange);
+
+    // Smooth LERP frame loop
+    const tick = () => {
+      if (isTouchDevice.current || !hasActiveMouse.current) {
+        // Mobile / Touch or idle fallback: ambient drift loop
+        ambientTime.current += 0.014;
+        targetPos.current.x = 0.5 + Math.sin(ambientTime.current * 0.7) * 0.22;
+        targetPos.current.y = 0.45 + Math.cos(ambientTime.current * 0.5) * 0.18;
+      }
+
+      // Smooth interpolation towards target
+      const lerpFactor = 0.08;
+      currentPos.current.x += (targetPos.current.x - currentPos.current.x) * lerpFactor;
+      currentPos.current.y += (targetPos.current.y - currentPos.current.y) * lerpFactor;
+
+      const cx = currentPos.current.x;
+      const cy = currentPos.current.y;
+
+      // Update CSS custom properties (no layout/reflow triggered)
+      if (reflectionRef.current) {
+        reflectionRef.current.style.setProperty(
+          "--reflection-x",
+          `${(cx - 0.5) * 110}%`
+        );
+        reflectionRef.current.style.setProperty(
+          "--reflection-y",
+          `${(cy - 0.5) * 90}%`
+        );
+      }
+
+      if (secondaryReflectionRef.current) {
+        secondaryReflectionRef.current.style.setProperty(
+          "--reflection-x",
+          `${(cx - 0.5) * 60}%`
+        );
+        secondaryReflectionRef.current.style.setProperty(
+          "--reflection-y",
+          `${(cy - 0.5) * 50}%`
+        );
+      }
+
+      rafId.current = requestAnimationFrame(tick);
+    };
+
+    rafId.current = requestAnimationFrame(tick);
+
+    return () => {
+      heroSection.removeEventListener("mousemove", handleMouseMove);
+      touchQuery.removeEventListener("change", handleTouchChange);
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
+
   return (
     <div
       ref={ref}
@@ -32,12 +122,13 @@ const HelmetVisor = forwardRef<HTMLDivElement, Props>(function HelmetVisor(
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        opacity: 0, // GSAP controls this
+        opacity: 0, // GSAP controls this opacity in Phase 1 & 3
         willChange: "transform, opacity",
       }}
     >
-      {/* Outer dark curved shape — helmet silhouette stand-in */}
+      {/* Outer dark curved shape — helmet silhouette */}
       <div
+        ref={visorContainerRef}
         style={{
           position: "relative",
           width: "min(520px, 80vw)",
@@ -61,21 +152,42 @@ const HelmetVisor = forwardRef<HTMLDivElement, Props>(function HelmetVisor(
             overflow: "hidden",
           }}
         >
-          {/*
-            Cursor-tracked specular highlight.
-            Parent Hero.tsx drives this element's background directly
-            via the highlightRef in the RAF loop — zero React re-renders.
-          */}
+          {/* Primary soft blurred specular light reflection */}
           <div
-            ref={highlightRef}
+            ref={reflectionRef}
             style={{
               position: "absolute",
-              inset: 0,
-              // Initial gradient — will be overwritten by RAF loop immediately
+              inset: "-15%",
+              borderRadius: "50%",
               background:
-                "radial-gradient(ellipse 55% 35% at 50% 50%, rgba(255,255,255,0.06) 0%, rgba(122,79,255,0.04) 30%, transparent 70%)",
+                "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.18) 0%, rgba(150,110,255,0.09) 35%, rgba(0,210,255,0.04) 65%, transparent 85%)",
+              filter: "blur(18px)",
+              opacity: 0.9,
+              pointerEvents: "none",
+              willChange: "transform",
+              transform:
+                "translate3d(var(--reflection-x, 0%), var(--reflection-y, 0%), 0)",
             }}
           />
+
+          {/* Secondary subtle sharp sheen layer for extra realistic depth */}
+          <div
+            ref={secondaryReflectionRef}
+            style={{
+              position: "absolute",
+              inset: "10%",
+              borderRadius: "50%",
+              background:
+                "radial-gradient(ellipse 40% 25% at 50% 50%, rgba(255,255,255,0.12) 0%, transparent 70%)",
+              filter: "blur(6px)",
+              opacity: 0.7,
+              pointerEvents: "none",
+              willChange: "transform",
+              transform:
+                "translate3d(var(--reflection-x, 0%), var(--reflection-y, 0%), 0)",
+            }}
+          />
+
           {/* Static rim light at top of visor */}
           <div
             style={{
