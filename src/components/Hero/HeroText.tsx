@@ -84,7 +84,7 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
           className="font-mono tracking-[0.2em] uppercase text-center md:text-right"
           style={{
             fontSize: "var(--text-eyebrow)",
-            color: "rgba(242, 237, 228, var(--text-tertiary))",
+            color: "rgba(242, 237, 228, var(--text-secondary))",
             opacity: 0,
             transition: "opacity var(--duration-fast) ease",
           }}

@@ -28,7 +28,7 @@ const ScrollIndicator = forwardRef<HTMLDivElement>(function ScrollIndicator(_, r
           fontSize: "var(--text-eyebrow)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "rgba(242, 237, 228, var(--text-tertiary))",
+          color: "rgba(242, 237, 228, var(--text-secondary))",
           writingMode: "horizontal-tb",
         }}
       >
