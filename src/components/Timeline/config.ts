@@ -38,6 +38,42 @@ export const erasConfig: EraConfig[] = [
     ],
   },
   {
+    id: "mclaren-later",
+    title: "McLaren Later Years",
+    years: "2010 – 2013",
+    accentColor: "#FF8000", // McLaren Papaya
+    bgTint: "rgba(255, 128, 0, 0.03)",
+    moments: [
+      {
+        id: "2010-turkey",
+        title: "The Rivalry Intensifies",
+        subtitle: "2010 Championship Fight",
+        description: "Hamilton fights a four-way battle for the title against Vettel, Alonso, and Webber. Despite three victories, an inconsistent mid-season sees the championship slip away to Vettel in the final race at Abu Dhabi.",
+        statNumber: "3",
+        statLabel: "Victories in 2010 season",
+        imagePath: "/images/moments/moment-01.jpg",
+      },
+      {
+        id: "2011-china",
+        title: "Flashes of Brilliance",
+        subtitle: "2011 Chinese Grand Prix",
+        description: "In a season dominated by Vettel's Red Bull, Hamilton produces stunning individual drives — including a commanding victory in China — but faces growing frustrations as the McLaren package struggles for consistency.",
+        statNumber: "3",
+        statLabel: "Race wins amid Vettel dominance",
+        imagePath: "/images/moments/moment-02.jpg",
+      },
+      {
+        id: "2012-monza",
+        title: "The Final Charge",
+        subtitle: "2012 Season & Mercedes Decision",
+        description: "Hamilton wins four races including a sensational victory at Monza, but the championship goes to Vettel once more. Behind the scenes, Hamilton is already planning his seismic move to Mercedes — a decision that will reshape the sport.",
+        statNumber: "4",
+        statLabel: "Victories in final McLaren season",
+        imagePath: "/images/moments/moment-04.jpg",
+      },
+    ],
+  },
+  {
     id: "mercedes",
     title: "Mercedes Dominance",
     years: "2014 – 2020",
