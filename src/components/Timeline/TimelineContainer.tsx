@@ -164,7 +164,7 @@ export default function TimelineContainer() {
 
         {/* Spine metadata HUD overlay */}
         <div
-          className="absolute left-4 top-[10%] flex flex-col font-mono text-[9px] uppercase tracking-widest text-neutral-400 gap-1 select-none transition-all duration-300"
+          className="absolute left-4 top-[10%] flex flex-col font-mono text-[9px] uppercase tracking-widest text-neutral-400 gap-1.5 select-none transition-all duration-300"
           style={{
             textShadow: `0 0 10px ${activeEra.color}2A`,
           }}
@@ -172,12 +172,19 @@ export default function TimelineContainer() {
           <span style={{ color: activeEra.color }} className="font-semibold transition-colors duration-500">
             {activeEra.years}
           </span>
-          <span className="opacity-60 text-white truncate max-w-[120px]">
+          <span className="opacity-70 text-white truncate max-w-[120px]">
             {activeEra.title}
           </span>
-          <span className="opacity-40 text-neutral-500">
-            Progress: {Math.round(activeEra.progress * 100)}%
-          </span>
+          {/* Visual progress bar */}
+          <div className="spine-progress-track">
+            <div
+              className="spine-progress-fill"
+              style={{
+                transform: `scaleX(${activeEra.progress})`,
+                backgroundColor: activeEra.color,
+              }}
+            />
+          </div>
         </div>
       </div>
 
