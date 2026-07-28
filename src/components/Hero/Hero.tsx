@@ -21,8 +21,6 @@ import ScrollIndicator from "./ScrollIndicator";
 export default function Hero() {
   const sectionRef     = useRef<HTMLElement>(null);
   const visorRef       = useRef<HTMLDivElement>(null);
-  // The inner visor highlight overlay (for cursor tracking)
-  const visorHighlightRef = useRef<HTMLDivElement>(null);
   const compositionRef = useRef<HeroCompositionRef>({
     fg: null, mid: null, bg: null, wrap: null,
   });
@@ -40,7 +38,7 @@ export default function Hero() {
     mouse.current.y = e.clientY / innerHeight;
   }, []);
 
-  // Single RAF loop handles both visor highlight AND parallax layers
+  // Single RAF loop handles parallax layers (active after composition fades in)
   const startRAFLoop = useCallback(() => {
     parallaxActive.current = true;
 
@@ -49,15 +47,7 @@ export default function Hero() {
 
       const { x, y } = mouse.current;
 
-      // ── Visor highlight (cursor-tracked radial gradient) ──
-      if (visorHighlightRef.current) {
-        const ox = 30 + x * 40; // 30–70%
-        const oy = 30 + y * 40;
-        visorHighlightRef.current.style.background =
-          `radial-gradient(ellipse 55% 35% at ${ox}% ${oy}%, rgba(255,255,255,0.07) 0%, rgba(122,79,255,0.05) 30%, transparent 70%)`;
-      }
-
-      // ── Parallax layers (active after composition fades in) ──
+      // ── Parallax layers ──
       const c = compositionRef.current;
       if (c.fg)  gsap.set(c.fg,  { x: (x - 0.5) * -10, y: (y - 0.5) * -10 });
       if (c.mid) gsap.set(c.mid, { x: (x - 0.5) * -22, y: (y - 0.5) * -22 });
@@ -198,10 +188,7 @@ export default function Hero() {
       }}
     >
       {/* Phase 1 & 2 — Visor blob */}
-      <HelmetVisor
-        ref={visorRef}
-        highlightRef={visorHighlightRef}
-      />
+      <HelmetVisor ref={visorRef} />
 
       {/* Phase 3 — Parallax composition */}
       <HeroComposition ref={compositionRef} />
