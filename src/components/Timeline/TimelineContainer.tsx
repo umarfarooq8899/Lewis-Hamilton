@@ -1,18 +1,80 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { erasConfig } from "./config";
-import { COLOR_GRAPHITE } from "@/config/tokens";
-import EraSection from "./EraSection";
+import { COLOR_GRAPHITE, EASE_SCRUB } from "@/config/tokens";
+import { EraConfig, Moment } from "./types";
 
 gsap.registerPlugin(ScrollTrigger);
+
+interface UnifiedMoment extends Moment {
+  eraId: string;
+  eraTitle: string;
+  eraYears: string;
+  accentColor: string;
+  bgTint: string;
+  muted?: boolean;
+}
+
+function getEraImageFilter(muted?: boolean, isLowRes?: boolean): string {
+  const base = muted
+    ? "grayscale(100%) contrast(1.15) brightness(0.7)"
+    : "grayscale(100%) contrast(1.1) brightness(0.8)";
+  if (isLowRes) {
+    return `${base} blur(1.5px)`;
+  }
+  return base;
+}
+
+function getEraTintOverlay(accentColor: string, muted?: boolean): string {
+  if (muted) {
+    return "rgba(128, 128, 128, 0.12)";
+  }
+  return `${accentColor}1C`;
+}
 
 export default function TimelineContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  
+  const momentsRef = useRef<HTMLDivElement[]>([]);
+  const imagesRef = useRef<HTMLDivElement[]>([]);
+  const statsRef = useRef<HTMLSpanElement[]>([]);
+
+  // Keep array references clear
+  momentsRef.current = [];
+  imagesRef.current = [];
+  statsRef.current = [];
+
+  const addToMomentsRef = (el: HTMLDivElement | null) => {
+    if (el && !momentsRef.current.includes(el)) momentsRef.current.push(el);
+  };
+
+  const addToImagesRef = (el: HTMLDivElement | null) => {
+    if (el && !imagesRef.current.includes(el)) imagesRef.current.push(el);
+  };
+
+  const addToStatsRef = (el: HTMLSpanElement | null) => {
+    if (el && !statsRef.current.includes(el)) statsRef.current.push(el);
+  };
+
+  // Flatten all moments across all eras into a single array
+  const allMoments = useMemo<UnifiedMoment[]>(() => {
+    return erasConfig.flatMap((era) =>
+      era.moments.map((moment) => ({
+        ...moment,
+        eraId: era.id,
+        eraTitle: era.title,
+        eraYears: era.years,
+        accentColor: era.accentColor,
+        bgTint: era.bgTint,
+        muted: era.muted,
+      }))
+    );
+  }, []);
+
   // Track active era configuration locally to drive progress labels
   const [activeEra, setActiveEra] = useState({
     id: erasConfig[0].id,
@@ -21,28 +83,15 @@ export default function TimelineContainer() {
     color: erasConfig[0].accentColor,
     progress: 0,
   });
-  
+
   // Track whether the timeline container itself is active in the viewport
   const [isTimelineActive, setIsTimelineActive] = useState(false);
- 
-  const handleActiveEraChange = useCallback((eraId: string, progress: number) => {
-    const era = erasConfig.find((e) => e.id === eraId);
-    if (era) {
-      setActiveEra({
-        id: era.id,
-        title: era.title,
-        years: era.years,
-        color: era.accentColor,
-        progress: progress,
-      });
-    }
-  }, []);
- 
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Trigger to track timeline container activation for progress spine visibility
+    // Track spine visibility
     const activeTrigger = ScrollTrigger.create({
       trigger: container,
       start: "top 75%",
@@ -51,7 +100,7 @@ export default function TimelineContainer() {
         setIsTimelineActive(self.isActive);
       },
     });
- 
+
     // 1. Total Scroll Progress indicator (Timeline Spine)
     const progressTrigger = ScrollTrigger.create({
       trigger: container,
@@ -68,79 +117,141 @@ export default function TimelineContainer() {
       },
     });
 
-    // 2. Background Color interpolation across Eras
-    const wrapperSections = container.querySelectorAll(".era-section-wrapper");
-    const cleanupTweens: { kill: () => void }[] = [];
+    // Mobile fallback HUD tracking
+    if (window.innerWidth < 768) {
+      return () => {
+        activeTrigger.kill();
+        progressTrigger.kill();
+      };
+    }
 
-    wrapperSections.forEach((section, index) => {
-      const era = erasConfig[index];
-      
-      // Interpolate background to subtle era tint as it rolls into the viewport
-      const tintTween = gsap.fromTo(
-        container,
-        { backgroundColor: COLOR_GRAPHITE },
-        {
-          backgroundColor: era.bgTint,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 80%",
-            end: "top 20%",
-            scrub: true,
-          },
-        }
-      );
+    // ── DESKTOP UNIFIED PINNED SCROLL EXPERIMENT ──
+    const momentsCount = allMoments.length;
+    const scrollDistance = momentsCount * 1000;
 
-      // Restore base graphite as it rolls out of the viewport
-      const resetTween = gsap.fromTo(
-        container,
-        { backgroundColor: era.bgTint },
-        {
-          backgroundColor: COLOR_GRAPHITE,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "bottom 80%",
-            end: "bottom 20%",
-            scrub: true,
-          },
-        }
-      );
-
-      // Track HUD active state & progress for mobile viewport scrolls
-      const hudTrigger = ScrollTrigger.create({
-        trigger: section,
-        start: "top 50%",
-        end: "bottom 50%",
-        onToggle: (self) => {
-          if (self.isActive) {
-            handleActiveEraChange(era.id, self.progress);
-          }
-        },
+    // Master Timeline for continuous pinning and scrub transitions
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "top top",
+        end: `+=${scrollDistance}`,
+        pin: true,
+        scrub: 0.5,
         onUpdate: (self) => {
-          if (self.isActive && window.innerWidth < 768) {
-            handleActiveEraChange(era.id, self.progress);
+          const momentIdx = Math.min(
+            Math.floor(self.progress * momentsCount),
+            momentsCount - 1
+          );
+          const currentItem = allMoments[momentIdx];
+          if (currentItem) {
+            setActiveEra({
+              id: currentItem.eraId,
+              title: currentItem.eraTitle,
+              years: currentItem.eraYears,
+              color: currentItem.accentColor,
+              progress: self.progress,
+            });
           }
         },
-      });
+      },
+    });
 
-      cleanupTweens.push(tintTween, resetTween, hudTrigger);
+    // Prepare initial states (all items except first are hidden)
+    const extraMoments = momentsRef.current.slice(1).filter(Boolean);
+    const extraImages = imagesRef.current.slice(1).filter(Boolean);
+    if (extraMoments.length > 0) {
+      gsap.set(extraMoments, { opacity: 0, y: 30, pointerEvents: "none" });
+    }
+    if (extraImages.length > 0) {
+      gsap.set(extraImages, { opacity: 0, scale: 1.1, pointerEvents: "none" });
+    }
+
+    // Multi-moment transition logic across entire unified timeline
+    allMoments.forEach((item, index) => {
+      const startTime = index * 10;
+      const isOrdinal = isNaN(Number(item.statNumber));
+      const parsedStat = isOrdinal ? 0 : Number(item.statNumber);
+      const counter = { val: 0 };
+
+      // Transition Out Previous Moment
+      if (index > 0) {
+        tl.to(
+          momentsRef.current[index - 1],
+          { opacity: 0, y: -30, duration: 3, ease: EASE_SCRUB },
+          startTime - 1.5
+        );
+        tl.to(
+          imagesRef.current[index - 1],
+          { opacity: 0, scale: 0.95, duration: 3, ease: EASE_SCRUB },
+          startTime - 1.5
+        );
+      }
+
+      // Transition In Current Moment
+      if (index > 0) {
+        tl.to(
+          momentsRef.current[index],
+          { opacity: 1, y: 0, duration: 3.5, ease: EASE_SCRUB },
+          startTime + 0.5
+        );
+        tl.to(
+          imagesRef.current[index],
+          { opacity: 1, scale: 1, duration: 4, ease: EASE_SCRUB },
+          startTime
+        );
+      } else {
+        tl.to(
+          imagesRef.current[0],
+          { scale: 1, duration: 3, ease: EASE_SCRUB },
+          0
+        );
+      }
+
+      // Background Tint Interpolation
+      tl.to(
+        container,
+        { backgroundColor: item.bgTint, ease: "none", duration: 3 },
+        startTime
+      );
+
+      // Roll stat numbers
+      if (!isOrdinal && parsedStat > 0) {
+        tl.to(
+          counter,
+          {
+            val: parsedStat,
+            duration: 4.5,
+            ease: "none",
+            onUpdate: () => {
+              const el = statsRef.current[index];
+              if (el) el.textContent = String(Math.round(counter.val));
+            },
+          },
+          startTime + 0.5
+        );
+      } else {
+        tl.fromTo(
+          statsRef.current[index],
+          { opacity: 0 },
+          { opacity: 1, duration: 2 },
+          startTime + 0.5
+        );
+      }
     });
 
     return () => {
-      progressTrigger.kill();
       activeTrigger.kill();
-      cleanupTweens.forEach((t) => t.kill());
+      progressTrigger.kill();
+      tl.kill();
     };
-  }, []);
+  }, [allMoments]);
 
   return (
     <div
       ref={containerRef}
-      className="w-full relative transition-colors duration-300"
+      className="w-full relative transition-colors duration-500 select-none"
       style={{
         backgroundColor: COLOR_GRAPHITE,
-        // Smooth hardware-accelerated transitions
         willChange: "background-color",
       }}
     >
@@ -172,7 +283,7 @@ export default function TimelineContainer() {
           <span style={{ color: activeEra.color }} className="font-semibold transition-colors duration-500">
             {activeEra.years}
           </span>
-          <span className="opacity-70 text-white truncate max-w-[120px]">
+          <span className="opacity-70 text-white truncate max-w-[120px] transition-all duration-500">
             {activeEra.title}
           </span>
           {/* Visual progress bar */}
@@ -188,17 +299,230 @@ export default function TimelineContainer() {
         </div>
       </div>
 
-      {/* ── ERAS LIST ── */}
-      <div className="w-full flex flex-col relative z-10">
-        {erasConfig.map((era) => (
+      {/* ── DESKTOP UNIFIED SCROLL CONTAINER (md and up) ── */}
+      <div className="hidden md:flex md:flex-row w-full h-screen relative overflow-hidden items-center">
+        {/* Visual background radial glow */}
+        <div className="absolute inset-0 pointer-events-none z-0">
           <div
-            key={era.id}
-            className="era-section-wrapper w-full relative"
-          >
-            <EraSection
-              config={era}
-              onActiveEraChange={handleActiveEraChange}
-            />
+            className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full blur-[160px] opacity-15 mix-blend-screen transition-colors duration-700 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${activeEra.color} 0%, transparent 70%)`,
+            }}
+          />
+        </div>
+
+        {/* LEFT COLUMN: Visual Media (Image Stack) */}
+        <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden z-10 flex items-center justify-center p-6 md:py-12 md:pl-28 md:pr-12 lg:pl-36 lg:pr-16">
+          <div className="glass-card relative w-full h-[90%] max-w-lg aspect-[3/4]">
+            {allMoments.map((item, idx) => (
+              <div
+                key={item.id}
+                ref={addToImagesRef}
+                className="absolute inset-0 transition-opacity duration-150 ease-in-out"
+                style={{
+                  zIndex: idx + 1,
+                  willChange: "transform, opacity",
+                }}
+              >
+                {/* Grayscale + Tint duotone overlay */}
+                <div
+                  className="absolute inset-0 z-10 mix-blend-color pointer-events-none transition-all duration-500"
+                  style={{
+                    background: getEraTintOverlay(item.accentColor, item.muted),
+                  }}
+                />
+
+                {/* Low-res grain overlay */}
+                {item.isLowRes && (
+                  <div
+                    className="absolute inset-0 z-30 pointer-events-none"
+                    style={{
+                      opacity: 0.08,
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                      backgroundSize: "150px 150px",
+                      backgroundRepeat: "repeat",
+                    }}
+                  />
+                )}
+
+                <Image
+                  src={item.imagePath}
+                  alt={item.title}
+                  fill
+                  sizes="50vw"
+                  style={{
+                    objectFit: "cover",
+                    filter: getEraImageFilter(item.muted, item.isLowRes),
+                  }}
+                  loading={idx === 0 ? undefined : "lazy"}
+                  priority={idx === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B18]/90 via-transparent to-transparent z-20" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Era Info & Unified Moments Stack */}
+        <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 flex flex-col justify-center" style={{ paddingInline: 'var(--container-px)' }}>
+          {/* Dynamically interpolating Era Header */}
+          <div className="mb-6 md:mb-12 transition-all duration-500">
+            <span
+              className="font-mono tracking-widest uppercase transition-colors duration-500"
+              style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)', color: activeEra.color }}
+            >
+              {activeEra.years}
+            </span>
+            <h2 className="font-ui font-semibold text-2xl md:text-4xl text-neutral-100 uppercase tracking-wider mt-1 transition-all duration-500">
+              {activeEra.title}
+            </h2>
+          </div>
+
+          <div className="relative w-full h-[60%] flex items-start">
+            {allMoments.map((item, idx) => (
+              <div
+                key={item.id}
+                ref={addToMomentsRef}
+                className="absolute inset-0 flex flex-col justify-start pointer-events-none"
+                style={{
+                  willChange: "transform, opacity",
+                }}
+              >
+                <div className="flex flex-col gap-3 md:gap-4 max-w-xl">
+                  <div>
+                    <h3 className="font-display font-medium text-lg md:text-2xl text-neutral-200 leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="font-mono tracking-wider uppercase mt-1" style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)' }}>
+                      {item.subtitle}
+                    </p>
+                  </div>
+
+                  <p className="font-ui font-light" style={{ fontSize: 'var(--text-body)', lineHeight: '1.7', color: 'rgba(242, 237, 228, var(--text-secondary))' }}>
+                    {item.description}
+                  </p>
+
+                  <div
+                    className="glass-card flex items-center gap-4 mt-6 transition-colors duration-500"
+                    style={{ padding: 'var(--card-padding)', cursor: 'default', borderLeft: `3px solid ${item.accentColor}` }}
+                  >
+                    <span
+                      ref={addToStatsRef}
+                      className="font-display text-4xl md:text-5xl font-black italic tracking-tighter text-neutral-100"
+                    >
+                      {item.statNumber}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-mono uppercase tracking-wider" style={{ fontSize: 'var(--text-eyebrow)', color: 'rgba(242, 237, 228, var(--text-tertiary))' }}>
+                        Metric
+                      </span>
+                      <span className="font-ui font-medium" style={{ fontSize: 'var(--text-body)', color: 'rgba(242, 237, 228, var(--text-primary))' }}>
+                        {item.statLabel}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── MOBILE STATIC SCROLL LAYOUT (below md) ── */}
+      <div className="flex flex-col md:hidden w-full px-6 py-12 gap-12 border-b border-white/5 bg-neutral-950/20">
+        {erasConfig.map((era) => (
+          <div key={era.id} className="flex flex-col gap-8 border-b border-white/5 pb-12 last:border-0 last:pb-0">
+            {/* Era header */}
+            <div>
+              <span
+                className="font-mono tracking-widest uppercase"
+                style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)', color: era.accentColor }}
+              >
+                {era.years}
+              </span>
+              <h2 className="font-ui font-semibold text-2xl text-neutral-100 uppercase tracking-wider mt-1">
+                {era.title}
+              </h2>
+            </div>
+
+            {/* Moments vertical list */}
+            <div className="flex flex-col gap-10">
+              {era.moments.map((moment) => (
+                <div
+                  key={moment.id}
+                  className="flex flex-col gap-4 border-b border-white/5 pb-8 last:border-0 last:pb-0"
+                >
+                  {/* Media card */}
+                  <div className="glass-card relative w-full aspect-[4/3]">
+                    <div
+                      className="absolute inset-0 z-10 mix-blend-color pointer-events-none"
+                      style={{
+                        background: getEraTintOverlay(era.accentColor, era.muted),
+                      }}
+                    />
+
+                    {moment.isLowRes && (
+                      <div
+                        className="absolute inset-0 z-30 pointer-events-none"
+                        style={{
+                          opacity: 0.08,
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                          backgroundSize: "150px 150px",
+                          backgroundRepeat: "repeat",
+                        }}
+                      />
+                    )}
+
+                    <Image
+                      src={moment.imagePath}
+                      alt={moment.title}
+                      fill
+                      sizes="100vw"
+                      style={{
+                        objectFit: "cover",
+                        filter: getEraImageFilter(era.muted, moment.isLowRes),
+                      }}
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B18]/90 via-transparent to-transparent z-20" />
+                  </div>
+
+                  {/* Text content */}
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <h3 className="font-display font-medium text-lg text-neutral-200 leading-tight">
+                        {moment.title}
+                      </h3>
+                      <p className="font-mono tracking-wider uppercase mt-1" style={{ fontSize: 'var(--text-eyebrow)', opacity: 'var(--text-tertiary)' }}>
+                        {moment.subtitle}
+                      </p>
+                    </div>
+
+                    <p className="font-ui font-light" style={{ fontSize: 'var(--text-body)', lineHeight: '1.7', color: 'rgba(242, 237, 228, var(--text-secondary))' }}>
+                      {moment.description}
+                    </p>
+
+                    {/* Metric Badge */}
+                    <div
+                      className="glass-card flex items-center gap-4 mt-3"
+                      style={{ padding: 'var(--card-padding)', cursor: 'default', borderLeft: `3px solid ${era.accentColor}` }}
+                    >
+                      <span className="font-display text-3xl font-black italic tracking-tighter text-neutral-100">
+                        {moment.statNumber}
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="font-mono uppercase tracking-wider" style={{ fontSize: 'var(--text-eyebrow)', color: 'rgba(242, 237, 228, var(--text-tertiary))' }}>
+                          Metric
+                        </span>
+                        <span className="font-ui font-medium" style={{ fontSize: 'var(--text-body)', color: 'rgba(242, 237, 228, var(--text-primary))' }}>
+                          {moment.statLabel}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
