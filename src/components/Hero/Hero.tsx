@@ -154,9 +154,9 @@ export default function Hero() {
       4.3
     );
 
-    // PHASE 4b: Count-up 0 → 105
+    // PHASE 4b: Count-up 0 → 104
     tl.to(counter, {
-      val: 105,
+      val: 104,
       duration: DURATION_COUNT,
       ease: EASE_STANDARD,
       onUpdate: updateCounter,

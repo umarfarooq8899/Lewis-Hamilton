@@ -74,7 +74,7 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Social Links (TODO) */}
+        {/* Social Links */}
         <div className="footer-credits-links">
           <span className="footer-section-title">Connect</span>
           <a
@@ -83,7 +83,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="footer-link-item"
           >
-            Twitter / X <span className="footer-todo-tag">TODO: Verify</span>
+            Twitter / X
           </a>
           <a
             href="https://www.instagram.com/lewishamilton/"
@@ -91,7 +91,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="footer-link-item"
           >
-            Instagram <span className="footer-todo-tag">TODO: Verify</span>
+            Instagram
           </a>
           <a
             href="https://www.lewishamilton.com/"
@@ -99,7 +99,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="footer-link-item"
           >
-            Official Website <span className="footer-todo-tag">TODO: Verify</span>
+            Official Website
           </a>
         </div>
 
