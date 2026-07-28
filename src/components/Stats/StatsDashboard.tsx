@@ -237,9 +237,6 @@ function NarrativeCard({ stat, delay }: { stat: StatCard; delay: number }) {
       <div className="stats-narrative-accent" />
       <div className="stats-card__inner stats-card__inner--narrative">
         <span className="stats-label stats-label--small">{stat.label}</span>
-        {stat.badge && (
-          <span className="stats-todo-badge">{stat.badge}</span>
-        )}
         <p className="stats-narrative-headline">{stat.narrativeHeadline}</p>
         {stat.narrativeBody && (
           <p className="stats-narrative-body">{stat.narrativeBody}</p>
@@ -275,7 +272,6 @@ function SectionHeader() {
       </h2>
       <p className="stats-section-sub">
         Raw numbers that define one of sport&apos;s most decorated careers.
-        Figures marked with a badge require verification before publication.
       </p>
     </div>
   );
