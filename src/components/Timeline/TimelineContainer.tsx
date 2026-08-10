@@ -6,7 +6,7 @@ import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { erasConfig } from "./config";
 import { COLOR_GRAPHITE, EASE_SCRUB } from "@/config/tokens";
-import { EraConfig, Moment } from "./types";
+import { Moment } from "./types";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,9 +39,11 @@ function getEraTintOverlay(accentColor: string, muted?: boolean): string {
 export default function TimelineContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const spineProgressFillRef = useRef<HTMLDivElement>(null);
   const momentsRef = useRef<HTMLDivElement[]>([]);
   const imagesRef = useRef<HTMLDivElement[]>([]);
   const statsRef = useRef<HTMLSpanElement[]>([]);
+  const activeEraIdRef = useRef<string>(erasConfig[0].id);
 
   // Keep array references clear
   momentsRef.current = [];
@@ -125,9 +127,10 @@ export default function TimelineContainer() {
       };
     }
 
-    // ── DESKTOP UNIFIED PINNED SCROLL EXPERIMENT ──
+    // ── DESKTOP UNIFIED PINNED SCROLL PERFORMANCE ──
     const momentsCount = allMoments.length;
-    const scrollDistance = momentsCount * 1000;
+    // Optimized scroll distance: ~480px per moment for snappy, energetic scrolling
+    const scrollDistance = momentsCount * 480;
 
     // Master Timeline for continuous pinning and scrub transitions
     const tl = gsap.timeline({
@@ -136,14 +139,22 @@ export default function TimelineContainer() {
         start: "top top",
         end: `+=${scrollDistance}`,
         pin: true,
-        scrub: 0.5,
+        scrub: 0.15, // Fast 0.15s scrub response (down from sluggish 0.5s)
         onUpdate: (self) => {
+          // Direct DOM mutation for spine progress bar (0 re-renders per scroll frame)
+          if (spineProgressFillRef.current) {
+            spineProgressFillRef.current.style.transform = `scaleX(${self.progress})`;
+          }
+
           const momentIdx = Math.min(
             Math.floor(self.progress * momentsCount),
             momentsCount - 1
           );
           const currentItem = allMoments[momentIdx];
-          if (currentItem) {
+
+          // Only trigger React state re-render when switching to a NEW era boundary
+          if (currentItem && currentItem.eraId !== activeEraIdRef.current) {
+            activeEraIdRef.current = currentItem.eraId;
             setActiveEra({
               id: currentItem.eraId,
               title: currentItem.eraTitle,
@@ -160,15 +171,15 @@ export default function TimelineContainer() {
     const extraMoments = momentsRef.current.slice(1).filter(Boolean);
     const extraImages = imagesRef.current.slice(1).filter(Boolean);
     if (extraMoments.length > 0) {
-      gsap.set(extraMoments, { opacity: 0, y: 30, pointerEvents: "none" });
+      gsap.set(extraMoments, { opacity: 0, y: 24, pointerEvents: "none" });
     }
     if (extraImages.length > 0) {
-      gsap.set(extraImages, { opacity: 0, scale: 1.1, pointerEvents: "none" });
+      gsap.set(extraImages, { opacity: 0, scale: 1.06, pointerEvents: "none" });
     }
 
-    // Multi-moment transition logic across entire unified timeline
+    // Tightened multi-moment keyframe transitions
     allMoments.forEach((item, index) => {
-      const startTime = index * 10;
+      const startTime = index * 8;
       const isOrdinal = isNaN(Number(item.statNumber));
       const parsedStat = isOrdinal ? 0 : Number(item.statNumber);
       const counter = { val: 0 };
@@ -177,13 +188,13 @@ export default function TimelineContainer() {
       if (index > 0) {
         tl.to(
           momentsRef.current[index - 1],
-          { opacity: 0, y: -30, duration: 3, ease: EASE_SCRUB },
-          startTime - 1.5
+          { opacity: 0, y: -24, duration: 2.2, ease: EASE_SCRUB },
+          startTime - 1.2
         );
         tl.to(
           imagesRef.current[index - 1],
-          { opacity: 0, scale: 0.95, duration: 3, ease: EASE_SCRUB },
-          startTime - 1.5
+          { opacity: 0, scale: 0.96, duration: 2.2, ease: EASE_SCRUB },
+          startTime - 1.2
         );
       }
 
@@ -191,18 +202,18 @@ export default function TimelineContainer() {
       if (index > 0) {
         tl.to(
           momentsRef.current[index],
-          { opacity: 1, y: 0, duration: 3.5, ease: EASE_SCRUB },
-          startTime + 0.5
+          { opacity: 1, y: 0, duration: 2.5, ease: EASE_SCRUB },
+          startTime + 0.3
         );
         tl.to(
           imagesRef.current[index],
-          { opacity: 1, scale: 1, duration: 4, ease: EASE_SCRUB },
+          { opacity: 1, scale: 1, duration: 2.8, ease: EASE_SCRUB },
           startTime
         );
       } else {
         tl.to(
           imagesRef.current[0],
-          { scale: 1, duration: 3, ease: EASE_SCRUB },
+          { scale: 1, duration: 2.2, ease: EASE_SCRUB },
           0
         );
       }
@@ -210,7 +221,7 @@ export default function TimelineContainer() {
       // Background Tint Interpolation
       tl.to(
         container,
-        { backgroundColor: item.bgTint, ease: "none", duration: 3 },
+        { backgroundColor: item.bgTint, ease: "none", duration: 2.5 },
         startTime
       );
 
@@ -220,21 +231,21 @@ export default function TimelineContainer() {
           counter,
           {
             val: parsedStat,
-            duration: 4.5,
+            duration: 3.2,
             ease: "none",
             onUpdate: () => {
               const el = statsRef.current[index];
               if (el) el.textContent = String(Math.round(counter.val));
             },
           },
-          startTime + 0.5
+          startTime + 0.3
         );
       } else {
         tl.fromTo(
           statsRef.current[index],
           { opacity: 0 },
-          { opacity: 1, duration: 2 },
-          startTime + 0.5
+          { opacity: 1, duration: 1.5 },
+          startTime + 0.3
         );
       }
     });
@@ -289,10 +300,12 @@ export default function TimelineContainer() {
           {/* Visual progress bar */}
           <div className="spine-progress-track">
             <div
+              ref={spineProgressFillRef}
               className="spine-progress-fill"
               style={{
                 transform: `scaleX(${activeEra.progress})`,
                 backgroundColor: activeEra.color,
+                willChange: "transform",
               }}
             />
           </div>
