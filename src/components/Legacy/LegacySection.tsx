@@ -46,9 +46,6 @@ function LegacyCard({ item, index }: { item: LegacyItem; index: number }) {
       <div className="legacy-card__content">
         <div className="legacy-card__meta">
           <span className="legacy-eyebrow">{item.eyebrow}</span>
-          {item.hasPlaceholder && (
-            <span className="legacy-todo-badge">TODO</span>
-          )}
         </div>
 
         <h3 className="legacy-headline">{item.headline}</h3>
@@ -58,13 +55,6 @@ function LegacyCard({ item, index }: { item: LegacyItem; index: number }) {
         )}
 
         <p className="legacy-body">{item.body}</p>
-
-        {item.hasPlaceholder && item.placeholderNote && (
-          <div className="legacy-placeholder-note">
-            <span className="legacy-placeholder-label">Editor note:</span>{" "}
-            {item.placeholderNote}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -82,9 +72,8 @@ function LegacySectionHeader() {
       <span className="legacy-section-eyebrow">Beyond the Car</span>
       <h2 className="legacy-section-title">Legacy & Impact</h2>
       <p className="legacy-section-sub">
-        Hamilton's influence extends well beyond race results. This section covers his
-        advocacy work and the initiatives he has built or supported. Copy marked{" "}
-        <span className="legacy-inline-todo">TODO</span> requires verification before publication.
+        Hamilton&apos;s influence extends well beyond race results. This section covers his
+        advocacy work and the initiatives he has built or supported.
       </p>
     </div>
   );
@@ -130,13 +119,9 @@ function OffTrackCard({
         {item.category}
       </span>
 
-      {/* Image placeholder — shown only when imageSrc is absent */}
+      {/* Decorative gradient fallback when no image is available */}
       {!item.imageSrc && (
-        <div className="offtrack-image-placeholder">
-          <span className="offtrack-placeholder-label">
-            [ Image needed — lifestyle/off-track sourcing required ]
-          </span>
-        </div>
+        <div className="offtrack-image-fallback" />
       )}
 
       {item.imageSrc && (
@@ -167,13 +152,6 @@ function OffTrackCard({
       <div className="offtrack-card__body">
         <h3 className="offtrack-headline">{item.headline}</h3>
         <p className="offtrack-body">{item.body}</p>
-
-        {item.hasPlaceholder && item.placeholderNote && (
-          <div className="offtrack-placeholder-note">
-            <span className="offtrack-placeholder-label">Editor note:</span>{" "}
-            {item.placeholderNote}
-          </div>
-        )}
       </div>
     </div>
   );

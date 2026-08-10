@@ -1502,3 +1502,41 @@ body::after {
     gap: 2.5rem;
   }
 }
+
+/* ─────────────────────────────────────────
+   SPINE PROGRESS BAR & OFF-TRACK FALLBACK
+   ───────────────────────────────────────── */
+
+.spine-progress-track {
+  width: 60px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.spine-progress-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transition: transform 0.1s linear, background-color 0.5s ease;
+  border-radius: 2px;
+}
+
+.offtrack-image-fallback {
+  width: 100%;
+  height: 140px;
+  background: linear-gradient(135deg, rgba(122, 79, 255, 0.15) 0%, rgba(28, 27, 24, 0.6) 100%);
+  border-bottom: 1px solid rgba(242, 237, 228, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.offtrack-image-fallback::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}

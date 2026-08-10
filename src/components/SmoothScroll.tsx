@@ -16,19 +16,22 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 0.85, // Fast, responsive momentum (down from heavy 1.2s)
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      touchMultiplier: 2,
+      wheelMultiplier: 1.1, // Slightly higher wheel responsiveness
+      touchMultiplier: 1.5,
     });
 
     globalLenis = lenis;
     lenisRef.current = lenis;
 
     // Sync Lenis RAF with GSAP ticker so ScrollTrigger stays in lock-step
-    gsap.ticker.add((time) => {
+    const updateLenis = (time: number) => {
       lenis.raf(time * 1000);
-    });
+    };
+
+    gsap.ticker.add(updateLenis);
 
     // Disable GSAP's lagSmoothing so Lenis owns timing
     gsap.ticker.lagSmoothing(0);
@@ -37,6 +40,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     lenis.on("scroll", ScrollTrigger.update);
 
     return () => {
+      gsap.ticker.remove(updateLenis);
       lenis.destroy();
       globalLenis = null;
     };

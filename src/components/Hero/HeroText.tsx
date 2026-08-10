@@ -10,40 +10,40 @@ export interface HeroTextHandle {
 }
 
 const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
-  const nameRef   = useRef<HTMLSpanElement>(null);
-  const labelRef  = useRef<HTMLSpanElement>(null);
-  const statRef   = useRef<HTMLSpanElement>(null);
-  const dividerRef= useRef<HTMLDivElement>(null);
+  const nameRef    = useRef<HTMLSpanElement>(null);
+  const labelRef   = useRef<HTMLSpanElement>(null);
+  const statRef    = useRef<HTMLSpanElement>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
 
   useImperativeHandle(ref, () => ({
-    get nameEl()   { return nameRef.current; },
-    get labelEl()  { return labelRef.current; },
-    get statEl()   { return statRef.current; },
-    get dividerEl(){ return dividerRef.current; },
+    get nameEl()    { return nameRef.current; },
+    get labelEl()   { return labelRef.current; },
+    get statEl()    { return statRef.current; },
+    get dividerEl() { return dividerRef.current; },
   }));
 
   return (
     <div
-      className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-[44%] px-8 md:px-10 lg:px-14 z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none overflow-hidden"
+      className="absolute right-4 md:right-12 lg:right-20 top-1/2 -translate-y-1/2 w-full md:w-[46%] px-6 md:px-8 lg:px-10 z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none overflow-visible"
     >
-      {/* Thin horizontal rule above name */}
+      {/* Thin horizontal rule above eyebrow label */}
       <div
         ref={dividerRef}
-        className="w-10 h-[1px] self-center md:self-end"
+        className="w-12 h-[1px] self-center md:self-end mb-1"
         style={{
           opacity: 0,
           willChange: "opacity, transform",
-          background: "rgba(242, 237, 228, var(--text-tertiary))",
+          background: "rgba(242, 237, 228, 0.4)",
         }}
       />
 
-      {/* Label line */}
+      {/* Eyebrow label */}
       <span
         ref={labelRef}
         className="font-mono tracking-[0.2em] uppercase text-center md:text-right"
         style={{
-          fontSize: "var(--text-eyebrow)",
-          color: "rgba(242, 237, 228, var(--text-secondary))",
+          fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
+          color: "rgba(242, 237, 228, 0.75)",
           opacity: 0,
           willChange: "opacity, transform",
         }}
@@ -51,13 +51,13 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
         Formula 1 · 2008 – 2024
       </span>
 
-      {/* Name */}
+      {/* Driver Name */}
       <span
         ref={nameRef}
-        className="font-ui font-semibold tracking-[0.14em] uppercase text-[#F2EDE4] text-center md:text-right"
+        className="font-ui font-semibold tracking-[0.16em] uppercase text-[#F2EDE4] text-center md:text-right"
         style={{
-          fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
-          lineHeight: 1.1,
+          fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)",
+          lineHeight: 1.2,
           opacity: 0,
           willChange: "opacity, transform",
         }}
@@ -65,26 +65,27 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
         Lewis Hamilton
       </span>
 
-      {/* Large count-up stat */}
-      <div className="flex flex-col items-center md:items-end gap-[0.1rem] mt-2">
+      {/* Large count-up stat block */}
+      <div className="flex flex-col items-center md:items-end gap-1 mt-1 pr-2 md:pr-4">
         <span
           ref={statRef}
-          className="font-display italic font-extrabold text-[#F2EDE4] text-center md:text-right"
+          className="font-display italic font-extrabold text-[#F2EDE4] text-center md:text-right inline-block"
           style={{
-            fontSize: "clamp(5rem, 11vw, 10rem)",
+            fontSize: "clamp(4.5rem, 10vw, 9.5rem)",
             lineHeight: 0.85,
+            paddingRight: "0.15em", // Prevents italic slant clipping on digit 4
             opacity: 0,
             willChange: "opacity, transform",
-            textShadow: "0 0 80px rgba(122,79,255,0.25)",
+            textShadow: "0 0 80px rgba(122,79,255,0.35)",
           }}
         >
           0
         </span>
         <span
-          className="font-mono tracking-[0.2em] uppercase text-center md:text-right"
+          className="font-mono tracking-[0.22em] uppercase text-center md:text-right"
           style={{
-            fontSize: "var(--text-eyebrow)",
-            color: "rgba(242, 237, 228, var(--text-tertiary))",
+            fontSize: "clamp(0.7rem, 0.85vw, 0.825rem)",
+            color: "rgba(242, 237, 228, 0.75)",
             opacity: 0,
             transition: "opacity var(--duration-fast) ease",
           }}
