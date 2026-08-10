@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 import Image from "next/image";
 import { HERO_IMAGE } from "@/config/imageConfig";
 
@@ -21,12 +21,48 @@ export interface HeroCompositionRef {
 
 const HeroComposition = forwardRef<HeroCompositionRef, {}>(
   function HeroComposition(_, ref) {
+    const visorHighlightRef = useRef<HTMLDivElement>(null);
+    const targetPos = useRef({ x: 0.5, y: 0.5 });
+    const currentPos = useRef({ x: 0.5, y: 0.5 });
+    const rafId = useRef<number | null>(null);
+
     // Expose individual layer refs to parent (Hero) via callback ref
     const setRef = (el: HTMLDivElement | null, key: keyof HeroCompositionRef) => {
       if (ref && typeof ref === "object" && ref.current !== undefined) {
         (ref as React.MutableRefObject<HeroCompositionRef>).current[key] = el;
       }
     };
+
+    useEffect(() => {
+      const handleMouseMove = (e: MouseEvent) => {
+        const { innerWidth, innerHeight } = window;
+        targetPos.current.x = Math.max(0, Math.min(1, e.clientX / innerWidth));
+        targetPos.current.y = Math.max(0, Math.min(1, e.clientY / innerHeight));
+      };
+
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+
+      const tick = () => {
+        currentPos.current.x += (targetPos.current.x - currentPos.current.x) * 0.08;
+        currentPos.current.y += (targetPos.current.y - currentPos.current.y) * 0.08;
+
+        if (visorHighlightRef.current) {
+          const vx = (20 + currentPos.current.x * 60).toFixed(2);
+          const vy = (15 + currentPos.current.y * 70).toFixed(2);
+          visorHighlightRef.current.style.setProperty("--composition-visor-x", `${vx}%`);
+          visorHighlightRef.current.style.setProperty("--composition-visor-y", `${vy}%`);
+        }
+
+        rafId.current = requestAnimationFrame(tick);
+      };
+
+      rafId.current = requestAnimationFrame(tick);
+
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+      };
+    }, []);
 
     return (
       <div
@@ -153,10 +189,33 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
             sizes="100vw"
             style={{
               objectFit: "cover",
-              objectPosition: "center center", // subject centered, slightly above middle
+              objectPosition: "center center",
               filter: "grayscale(100%) contrast(1.1) brightness(0.9)",
             }}
             priority
+          />
+
+          {/* Interactive Mouse-Reactive Visor Reflection Glow over driver's helmet in photo */}
+          <div
+            ref={visorHighlightRef}
+            style={{
+              position: "absolute",
+              top: "30%",
+              left: "19%",
+              width: "22vw",
+              height: "12vw",
+              maxWidth: "280px",
+              maxHeight: "160px",
+              borderRadius: "50%",
+              pointerEvents: "none",
+              zIndex: 5,
+              background:
+                "radial-gradient(ellipse 60% 40% at var(--composition-visor-x, 50%) var(--composition-visor-y, 50%), rgba(255,255,255,0.65) 0%, rgba(160,130,255,0.3) 30%, rgba(0,210,255,0.15) 55%, transparent 75%)",
+              mixBlendMode: "screen",
+              filter: "blur(3px)",
+              opacity: 0.9,
+              willChange: "background",
+            }}
           />
         </div>
 
