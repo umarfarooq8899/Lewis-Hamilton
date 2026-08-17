@@ -16,11 +16,11 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 0.85, // Fast, responsive momentum (down from heavy 1.2s)
+      duration: 1.0, // Weighted settling — raised from 0.85 to reduce floaty tail
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1.1, // Slightly higher wheel responsiveness
-      touchMultiplier: 1.5,
+      wheelMultiplier: 0.9, // Tightened from 1.1 — less distance per wheel tick
+      touchMultiplier: 1.5, // Touch kept independent — native-feeling swipe response
     });
 
     globalLenis = lenis;
