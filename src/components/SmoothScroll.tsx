@@ -21,6 +21,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       smoothWheel: true,
       wheelMultiplier: 0.9, // Tightened from 1.1 — less distance per wheel tick
       touchMultiplier: 1.5, // Touch kept independent — native-feeling swipe response
+      autoRaf: false, // CRITICAL: prevent Lenis's internal rAF — we drive it via gsap.ticker
     });
 
     globalLenis = lenis;

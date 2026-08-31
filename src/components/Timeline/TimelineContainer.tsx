@@ -139,7 +139,7 @@ export default function TimelineContainer() {
         start: "top top",
         end: `+=${scrollDistance}`,
         pin: true,
-        scrub: 0.15, // Fast 0.15s scrub response (down from sluggish 0.5s)
+        scrub: true, // 1:1 with scroll position — Lenis already owns all smoothing
         onUpdate: (self) => {
           // Direct DOM mutation for spine progress bar (0 re-renders per scroll frame)
           if (spineProgressFillRef.current) {
