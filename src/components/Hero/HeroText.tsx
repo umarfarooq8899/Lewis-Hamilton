@@ -24,7 +24,7 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
 
   return (
     <div
-      className="absolute right-4 md:right-12 lg:right-20 top-1/2 -translate-y-1/2 w-full md:w-[46%] px-6 md:px-8 lg:px-10 z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none overflow-visible"
+      className="absolute inset-x-0 md:inset-x-auto md:right-12 lg:right-20 top-1/2 -translate-y-1/2 w-full md:w-[46%] max-w-full px-4 sm:px-6 md:px-8 lg:px-10 z-10 flex flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none overflow-visible"
     >
       {/* Thin horizontal rule above eyebrow label */}
       <div
@@ -71,7 +71,7 @@ const HeroText = forwardRef<HeroTextHandle>(function HeroText(_, ref) {
           ref={statRef}
           className="font-display italic font-extrabold text-[#F2EDE4] text-center md:text-right inline-block"
           style={{
-            fontSize: "clamp(4.5rem, 10vw, 9.5rem)",
+            fontSize: "clamp(3.2rem, 9.5vw, 9.5rem)",
             lineHeight: 0.85,
             paddingRight: "0.15em", // Prevents italic slant clipping on digit 4
             opacity: 0,

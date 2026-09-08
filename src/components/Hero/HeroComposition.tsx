@@ -198,14 +198,13 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
           {/* Interactive Mouse-Reactive Visor Reflection Glow over driver's helmet in photo */}
           <div
             ref={visorHighlightRef}
+            className="hidden sm:block"
             style={{
               position: "absolute",
               top: "30%",
               left: "19%",
-              width: "22vw",
-              height: "12vw",
-              maxWidth: "280px",
-              maxHeight: "160px",
+              width: "clamp(120px, 20vw, 260px)",
+              height: "clamp(70px, 11vw, 150px)",
               borderRadius: "50%",
               pointerEvents: "none",
               zIndex: 5,

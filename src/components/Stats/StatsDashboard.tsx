@@ -9,16 +9,6 @@ import { EASE_STANDARD, DURATION_FAST, DURATION_BASE, DURATION_COUNT } from "@/c
 gsap.registerPlugin(ScrollTrigger);
 
 // ─────────────────────────────────────────
-//  SIZE → LAYOUT CLASS MAP
-// ─────────────────────────────────────────
-const sizeClasses: Record<StatCard["size"], string> = {
-  hero:   "col-span-2 row-span-2 sm:col-span-4 lg:col-span-3",
-  large:  "col-span-2 row-span-2 sm:col-span-2 lg:col-span-2",
-  medium: "col-span-2 sm:col-span-2 lg:col-span-1",
-  small:  "col-span-1 sm:col-span-1 lg:col-span-1",
-};
-
-// ─────────────────────────────────────────
 //  HERO STAT CARD (career wins, matches hero section treatment)
 // ─────────────────────────────────────────
 function HeroStatCard({ stat }: { stat: StatCard }) {
@@ -56,7 +46,7 @@ function HeroStatCard({ stat }: { stat: StatCard }) {
   return (
     <div
       ref={cardRef}
-      className={`glass-card glass-card--hero stats-card--hero ${sizeClasses.hero} group`}
+      className="glass-card glass-card--hero stats-card--hero group"
       style={{ opacity: 0 }}
     >
       {/* Glass highlight rim */}
@@ -121,7 +111,7 @@ function LargeStatCard({ stat, delay }: { stat: StatCard; delay: number }) {
   return (
     <div
       ref={cardRef}
-      className={`glass-card stats-card--large ${sizeClasses.large} group`}
+      className="glass-card stats-card--large group"
       style={{ opacity: 0 }}
     >
       <div className="glass-card__highlight" />
@@ -184,7 +174,7 @@ function CountupCard({
   return (
     <div
       ref={cardRef}
-      className={`glass-card ${isSmall ? "stats-card--small" : "stats-card--medium"} ${sizeClasses[stat.size]} group`}
+      className={`glass-card ${isSmall ? "stats-card--small" : "stats-card--medium"} group`}
       style={{ opacity: 0 }}
     >
       <div className="glass-card__highlight" />
@@ -229,7 +219,7 @@ function NarrativeCard({ stat, delay }: { stat: StatCard; delay: number }) {
   return (
     <div
       ref={cardRef}
-      className={`glass-card stats-card--narrative ${sizeClasses.medium} group`}
+      className="glass-card stats-card--narrative group"
       style={{ opacity: 0 }}
     >
       <div className="glass-card__highlight" />

@@ -112,8 +112,8 @@ const HelmetVisor = forwardRef<HTMLDivElement>(function HelmetVisor(
         ref={visorContainerRef}
         style={{
           position: "relative",
-          width: "min(520px, 80vw)",
-          height: "min(620px, 85vh)",
+          width: "min(460px, 75vw)",
+          height: "min(560px, 75vh)",
           borderRadius: "50% 50% 40% 40% / 60% 60% 40% 40%",
           background:
             "radial-gradient(ellipse at 50% 30%, #2a2926 0%, #1C1B18 60%, #131210 100%)",
