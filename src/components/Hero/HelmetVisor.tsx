@@ -105,6 +105,7 @@ const HelmetVisor = forwardRef<HTMLDivElement>(function HelmetVisor(
         justifyContent: "center",
         opacity: 0, // GSAP controls this — Phase 1 fades to 1, Phase 3 back to 0
         willChange: "transform, opacity",
+        pointerEvents: "none",
       }}
     >
       {/* Outer dark curved shape — helmet silhouette */}

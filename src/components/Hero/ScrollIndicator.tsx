@@ -19,6 +19,7 @@ const ScrollIndicator = forwardRef<HTMLDivElement>(function ScrollIndicator(_, r
         opacity: 0, // GSAP controls initial appear
         willChange: "opacity",
         zIndex: 10,
+        pointerEvents: "none",
       }}
     >
       {/* Label */}

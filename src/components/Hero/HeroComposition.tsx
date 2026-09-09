@@ -73,6 +73,7 @@ const HeroComposition = forwardRef<HeroCompositionRef, {}>(
           opacity: 0, // GSAP controls this
           willChange: "opacity",
           overflow: "hidden",
+          pointerEvents: "none",
         }}
       >
         {/* ── BACKGROUND LAYER — most parallax drift ── */}

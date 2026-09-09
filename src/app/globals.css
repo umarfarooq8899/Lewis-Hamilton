@@ -120,16 +120,15 @@ html {
   background-color: var(--color-graphite);
   color: var(--color-offwhite);
   font-family: var(--font-ui);
-  /* Lenis sets smooth scroll — prevent browser native smooth conflict */
+  /* Lenis sets smooth scroll on desktop — prevent browser native smooth conflict */
   scroll-behavior: auto !important;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
   background-color: var(--color-graphite);
-  overscroll-behavior: none;
-  /* Prevent flash of unpositioned content */
-  overflow-x: hidden;
+  /* Prevent horizontal overflow without breaking mobile touch scroll container */
+  overflow-x: clip;
 }
 
 /* ─────────────────────────────────────────
